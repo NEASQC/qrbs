@@ -30,7 +30,7 @@ setup(
     license="European Union Public License 1.2",
 
     packages=find_packages(),
-    install_requires=["numpy"],
+    install_requires=["numpy, myqlm"],
     # Don't change these two lines
     tests_require=["pytest"],
     cmdclass={'test': PyTest},
