@@ -23,9 +23,10 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 setup(
-    name="mylib",
+    name="qrbs",
     version="0.0.1",
-    author="XXX",
+    author="Samuel Magaz-Romero",
+    author_email="s.magazr@udc.es",
     license="European Union Public License 1.2",
 
     packages=find_packages(),

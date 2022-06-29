@@ -1,6 +1,6 @@
 # NEASQC lib template
 
-This repository is a template for NEASQC libraries.
+This is the repository for the Quantum Rule-Based System (QRBS) library of NEASQC project (WP6).
 
 ## Licence
 

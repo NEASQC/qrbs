@@ -7,7 +7,7 @@
 
 .. only:: html
 
-    Welcome to the <PROJECT> documentation
+    Welcome to the Quantum Rule-Based System library documentation
     ======================================
 
     .. image:: logo-neasqc.svg
