@@ -9,9 +9,9 @@ class OrOperator(LeftHandSide, Buildable):
     Class representing an OrOperator, relating the statement of its children with and OR relationship. This class is used to model the Composite design pattern, acting as (one of) the Composite class.
 
     :param leftChild: One of the children which is relating
-    :type leftChild: class.`lefthandside.LeftHandSide`
+    :type leftChild: class:`lefthandside.LeftHandSide`
     :param rightChild: One of the children which is relating
-    :type rightChild: class.`lefthandside.LeftHandSide`
+    :type rightChild: class:`lefthandside.LeftHandSide`
     """
 
     def __init__(self, leftChild, rightChild) -> None:

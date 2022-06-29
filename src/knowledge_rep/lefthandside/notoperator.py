@@ -9,7 +9,7 @@ class NotOperator(LeftHandSide, Buildable):
     Class representing a NotOperator, negating the statement of its child. This class is used to model the Composite design pattern, acting as (one of) the Composite class.
 
     :param child: Child which statements is negating
-    :type child: class.`lefthandside.LeftHandSide`
+    :type child: class:`lefthandside.LeftHandSide`
     """
 
     def __init__(self, child) -> None:
