@@ -5,13 +5,13 @@ from src.knowledge_rep.lefthandside.lefthandside import LeftHandSide
 from qat.lang.AQASM.routines import QRoutine
 
 class AndOperator(LeftHandSide, Buildable):
-    """
-    Class representing an AndOperator, relating the statement of its children with and AND relationship. This class is used to model the Composite design pattern, acting as (one of) the Composite class.
+    """Class representing an AndOperator.
+    
+    An AndOperator relates the statements of its children with an AND relationship. This class is used to model the Composite design pattern, acting as (one of) the Composite class.
 
-    :param leftChild: One of the children which is relating
-    :type leftChild: class:`lefthandside.LeftHandSide`
-    :param rightChild: One of the children which is relating
-    :type rightChild: class:`lefthandside.LeftHandSide`
+    Attributes:
+        leftChild (:obj:`LeftHandSide`): One of the children which is relating.
+        rightChild (:obj:`LeftHandSide`): One of the children which is relating.
     """
 
     def __init__(self, leftChild, rightChild) -> None:

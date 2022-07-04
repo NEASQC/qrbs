@@ -1,5 +1,5 @@
 # -*- coding : utf-8 -*-
 
 """
-QRBS management module
+Left Hand Side module
 """
