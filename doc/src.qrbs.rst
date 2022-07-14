@@ -1,6 +1,20 @@
 QRBS package
 ============
 
+Module contents
+---------------
+
+.. automodule:: src.qrbs
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   - `InferenceEngine`_
+   - `WorkingMemory`_
+   - `QRBS`_
+   - `QRBSHandler`_
+   - `QPU`_
+
 InferenceEngine
 ---------------
 
@@ -33,10 +47,10 @@ QRBSHandler
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+QPU 
+-----------
 
-.. automodule:: src.qrbs
+.. automodule:: src.qrbs.qpu
    :members:
    :undoc-members:
    :show-inheritance:

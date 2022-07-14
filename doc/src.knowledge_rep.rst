@@ -9,6 +9,18 @@ Subpackages
 
    src.knowledge_rep.lefthandside
 
+Module contents
+---------------
+
+.. automodule:: src.knowledge_rep
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   - `Buildable`_
+   - `Rule`_
+   - `Knowledge island`_
+
 Buildable
 ---------
 
@@ -29,14 +41,6 @@ Knowledge island
 ----------------
 
 .. automodule:: src.knowledge_rep.knowledgeisland
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: src.knowledge_rep
    :members:
    :undoc-members:
    :show-inheritance:

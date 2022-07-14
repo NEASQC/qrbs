@@ -1,6 +1,20 @@
 Left Hand Side package
 ======================
 
+Module contents
+---------------
+
+.. automodule:: src.knowledge_rep.lefthandside
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   - `LeftHandSide`_
+   - `Fact`_
+   - `NotOperator`_
+   - `AndOperator`_
+   - `OrOperator`_
+
 LeftHandSide
 ------------
 
@@ -37,14 +51,6 @@ OrOperator
 ----------
 
 .. automodule:: src.knowledge_rep.lefthandside.oroperator
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: src.knowledge_rep.lefthandside
    :members:
    :undoc-members:
    :show-inheritance:
