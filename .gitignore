@@ -1,0 +1,9 @@
+# Pycache
+__pycache__/
+
+# Sphinx build
+doc/build
+
+# Packaging
+dist/*
+*.egg-info

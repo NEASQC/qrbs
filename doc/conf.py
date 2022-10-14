@@ -8,7 +8,7 @@ from sphinx.ext.autodoc import between
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-# sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('..'))
 
 # -- General configuration ----------------------------------------------------
 
@@ -19,8 +19,8 @@ from sphinx.ext.autodoc import between
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'nbsphinx',
               'sphinx.ext.mathjax', 'sphinx.ext.napoleon', 'sphinxcontrib.bibtex',
-              'sphinxcontrib.programoutput', 'sphinxcontrib.contentui']
-autodoc_mock_imports = ["cirq"]
+              'sphinxcontrib.programoutput', 'sphinxcontrib.contentui', 'enum_tools.autoenum']
+autodoc_mock_imports = ["cirq", "qat"]
 
 napoleon_google_docstring = True
 
@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'NEASQC documentation'
-copyright = 'Atos 2021-2022'
+copyright = 'UDC 2021-2022'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

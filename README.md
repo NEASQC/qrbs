@@ -1,6 +1,6 @@
 # NEASQC lib template
 
-This repository is a template for NEASQC libraries.
+This is the repository for the Quantum Rule-Based System (QRBS) library of NEASQC project (WP6).
 
 ## Licence
 
@@ -56,18 +56,16 @@ This way, you can write tests either right next to the corresponding code (conve
 If you are not familiar with unit testing and you feel that it's too much for your project, that's fine.
 The bare minimum would be to include some run examples wrapped in test functions (functional tests).
 
-Remark that in this template, the same tests are in my\_lib/test\_my\_lib.py and tests/test\_my\_lib.py.
-
 ## GitHub CI
 This repository contains a GitHub Workflow file that will automatically run pytest when changes are pushed.  
 Details on disabling and enabling this feature can be found [here](https://docs.github.com/en/enterprise-server@3.0/actions/managing-workflow-runs/disabling-and-enabling-a-workflow).
 
 ## Documentation
-Customize the GitHub Workflow YAML file: *repo_name*/.github/workflow/sphinx\_doc.yml
+Customize the GitHub Workflow YAML file: .github/workflow/sphinx\_doc.yml
 There is a basic index.rst template under 'doc'. Modify it as you want.
 
 Any modification under the folder 'doc' pushed to GitHub will trigger a rebuild of the documentation (using GitHub CI).
-If the build is successful, then the resulting html documentation can be access at: https://neasqc.github.io/repo_name
+If the build is successful, then the resulting html documentation can be access at: https://neasqc.github.io/qrbs
 
 Notes: 
   - You can follow the build process on the 'Actions' tab below the name of the repository.
