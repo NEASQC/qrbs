@@ -1,13 +1,10 @@
 # -*- coding : utf-8 -*-
 
 """
-Test for LeftHandSide elements
+Test for KnowledgeRep elements
 """
 
-from src.knowledge_rep.lefthandside.andoperator import AndOperator
-from src.knowledge_rep.lefthandside.fact import Fact
-from src.knowledge_rep.lefthandside.notoperator import NotOperator
-from src.knowledge_rep.lefthandside.oroperator import OrOperator
+from neasqc_qrbs.knowledge_rep import Fact, NotOperator, AndOperator, OrOperator, Rule, KnowledgeIsland
 
 
 class TestFact:
@@ -57,4 +54,31 @@ class TestAndOperator:
         Test the constructor
         """
         AndOperator(Fact('test1', 1.0),Fact('test2', 0.5, 0.5))
+
+
+class TestRule:
+    """
+    Testing Rule class  
+    """
+
+    def test_instantiation(self):
+        """
+        Test the constructor
+        """
+        Rule(Fact('test1', 1.0),Fact('test2', 0.5), 0.675)
+
+
+class TestKnowledgeIsland:
+    """
+    Testing KnowledgeIsland class  
+    """
+
+    def test_instantiation(self):
+        """
+        Test the constructor
+        """
+        KnowledgeIsland([
+            Rule(Fact('test1', 1.0),Fact('test2', 0.5), 0.675),
+            Rule(NotOperator(Fact('test3', 0.3)),Fact('test4', 0.86), 0.345)
+        ])
         

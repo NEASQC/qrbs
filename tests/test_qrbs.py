@@ -5,7 +5,7 @@ Test for KnowledgeIsland
 """
 
 
-from src.qrbs.qrbs import QRBS
+from neasqc_qrbs.qrbs import QRBS
 
 
 class TestQRBS:

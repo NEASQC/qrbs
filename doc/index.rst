@@ -37,7 +37,7 @@
     :caption: Source code documentation
     :hidden:
 
-    src
+    modules
 
 .. toctree::
     :maxdepth: 1

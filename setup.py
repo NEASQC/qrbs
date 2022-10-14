@@ -23,14 +23,14 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 setup(
-    name="qrbs",
+    name="neasqc_qrbs",
     version="0.0.1",
     author="Samuel Magaz-Romero",
     author_email="s.magazr@udc.es",
     license="European Union Public License 1.2",
 
     packages=find_packages(),
-    install_requires=["numpy, myqlm"],
+    install_requires=["numpy", "myqlm"],
     # Don't change these two lines
     tests_require=["pytest"],
     cmdclass={'test': PyTest},
