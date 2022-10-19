@@ -16,8 +16,12 @@ class TestFact:
         """
         Test the constructor
         """
-        Fact('test1', 1.0)
-        Fact('test2', 0.5, 0.5)
+        fact_1 = Fact('test1', 1.0)
+        fact_2 = Fact('test2', 0.5, 0.5)
+        fact_2_copy = Fact('test2', 0.5, 0.5)
+
+        assert fact_1 != fact_2
+        assert fact_2 == fact_2_copy
 
 
 class TestNotOperator:

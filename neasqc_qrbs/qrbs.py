@@ -18,6 +18,9 @@ class WorkingMemory():
         super().__init__()
         self._facts = facts
 
+    def __eq__(self, other) -> bool:
+        return self._facts == other._facts
+
     def assert_fact(self, fact) -> Fact:
         """Asserts a fact into the memory.
 
@@ -53,6 +56,9 @@ class InferenceEngine():
         super().__init__()
         self._rules = rules
         self._islands = islands
+
+    def __eq__(self, other) -> bool:
+        return self._rules == other._rules and self._islands == other._islands
 
     def assert_rule(self, rule) -> Rule:
         """Asserts a rule into the engine.
@@ -109,6 +115,9 @@ class QRBS():
         super().__init__()
         self._memory = WorkingMemory()
         self._engine = InferenceEngine()
+
+    def __eq__(self, other) -> bool:
+        return self._memory == other._memory and self._engine == other._engine
 
     def assert_fact(self, attribute, value, imprecission=0.0) -> Fact:
         """Creates a fact and asserts it into the system.

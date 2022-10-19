@@ -10,7 +10,6 @@ class Buildable(ABC):
 
     def __init__(self) -> None:
         super().__init__()
-
     
     @abstractmethod
     def build(self) -> QRoutine:
@@ -23,7 +22,6 @@ class LeftHandSide(Buildable):
 
     def __init__(self) -> None:
         super().__init__()
-
     
     def build(self) -> QRoutine:
         return super().build()
@@ -46,7 +44,9 @@ class Fact(LeftHandSide):
         self.value = value
         self.imprecission = imprecission
 
-    
+    def __eq__(self, other) -> bool:
+        return self.attribute == other.attribute and self.value == other.value and self.imprecission == other.imprecission
+
     def build(self) -> QRoutine:
         return super().build()
         
@@ -65,6 +65,9 @@ class AndOperator(LeftHandSide):
         super().__init__()
         self.leftChild = leftChild
         self.rightChild = rightChild
+
+    def __eq__(self, other) -> bool:
+        return self.leftChild == other.leftChild and self.rightChild == other.rightChild
 
     def build(self) -> QRoutine:
         return super().build()
@@ -85,6 +88,9 @@ class OrOperator(LeftHandSide):
         self.leftChild = leftChild
         self.rightChild = rightChild
 
+    def __eq__(self, other) -> bool:
+        return self.leftChild == other.leftChild and self.rightChild == other.rightChild
+
     def build(self) -> QRoutine:
         return super().build()
 
@@ -102,6 +108,9 @@ class NotOperator(LeftHandSide):
     def __init__(self, child) -> None:
         super().__init__()
         self.child = child
+
+    def __eq__(self, other) -> bool:
+        return self.child == other.child
 
     def build(self) -> QRoutine:
         return super().build()
@@ -124,6 +133,8 @@ class Rule(Buildable):
         self.righthandside = righthandside
         self.uncertainty = uncertainty
 
+    def __eq__(self, other) -> bool:
+        return self.lefthandside == other.lefthandside and self.righthandside == other.righthandside and self.uncertainty == other.uncertainty
 
     def build(self) -> QRoutine:
         return super().build()
@@ -141,6 +152,9 @@ class KnowledgeIsland(Buildable):
     def __init__(self, rules) -> None:
         super().__init__()
         self.rules = rules
+
+    def __eq__(self, other) -> bool:
+        return self.rules == other.rules
 
     def build(self) -> QRoutine:
         return super().build()

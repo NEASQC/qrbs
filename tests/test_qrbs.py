@@ -17,4 +17,8 @@ class TestQRBS:
         """
         Test the constructor
         """
-        QRBS()
+        system_a = QRBS()
+        system_b = QRBS()
+        
+        assert system_a == system_b
+        
