@@ -31,7 +31,7 @@ class WorkingMemory():
             :obj:`Fact`: The asserted fact.
         """
         self._facts.append(fact)
-        return self._facts[self._facts.index(fact)]
+        return fact
 
     def retract_fact(self, fact) -> None:
         """Retracts a fact from the memory.
@@ -70,7 +70,7 @@ class InferenceEngine():
             :obj:`Rule`: The asserted rule.
         """
         self._rules.append(rule)
-        return self._rules[self._rules.index(rule)]
+        return rule
 
     def retract_rule(self, rule) -> None:
         """Retracts a rule from the engine.
@@ -90,7 +90,7 @@ class InferenceEngine():
             :obj:`KnowledgeIsland`: The asserted knowledge island.
         """
         self._islands.append(island)
-        return self._islands[self._islands.index(island)]
+        return island
 
     def retract_island(self, island) -> None:
         """Retracts a knowledge island from the engine.
