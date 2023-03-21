@@ -1,6 +1,6 @@
 # -*- coding : utf-8 -*
 
-from enum import Enum, auto
+from abc import ABC, abstractmethod
 
 from .knowledge_rep import Fact, Rule, KnowledgeIsland
 
@@ -191,8 +191,8 @@ class QRBSHandler():
     """
 
     @staticmethod
-    def evaluate(qrbs, qpu):
-        """Evaluates whether a QRBS can be executed on a QPU
+    def evaluate(qrbs, qpu) -> None:
+        """Evaluates whether a QRBS can be executed on a QPU.
 
         Args:
             qrbs (:obj:`QRBS`): The QRBS to be evaluated.
@@ -201,8 +201,8 @@ class QRBSHandler():
         pass
 
     @staticmethod
-    def execute(qrbs, qpu):
-        """Executes the QRBS on the QPU
+    def execute(qrbs, qpu) -> None:
+        """Executes the QRBS on the QPU.
 
         Args:
             qrbs (:obj:`QRBS`): The QRBS to be executed.
@@ -211,13 +211,51 @@ class QRBSHandler():
         pass
       
 
-class QPU(Enum):
-    """Enumerate encapsulating QPUs. 
-    
-    This class proporcionates the available Quantum Processing Units (QPU).
+class QPU(ABC):
+    """Interface defining the structure to implement Quantum Processing Units (QPU).
     """
 
-    PYLINALG = auto()
+    def __init__(self) -> None:
+        super().__init__()
+        
+    @abstractmethod
+    def evaluate(circuit) -> None:
+        """Evaluates whether a quantum circuit can be executed on this QPU.
+
+        Args:
+            circuit (:obj:`Circuit`): The circuit to be evaluated.
+        """
+        pass
+
+    @abstractmethod
+    def execute(circuit) -> None:
+        """Executes the circuit on this QPU.
+
+        Args:
+            circuit (:obj:`Circuit`): The circuit to be executed.
+        """
+        pass
+      
+
+class MyQlmQPU(QPU):
+    """ myQLM implementation of a Quantum Processing Unit (QPU).
     """
-    Python Linear-algebra simulator
-    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        
+    def evaluate(circuit) -> None:
+        """Evaluates whether a quantum circuit can be executed on this QPU.
+
+        Args:
+            circuit (:obj:`Circuit`): The circuit to be evaluated.
+        """
+        pass
+
+    def execute(circuit) -> None:
+        """Executes the circuit on this QPU.
+
+        Args:
+            circuit (:obj:`Circuit`): The circuit to be executed.
+        """
+        pass
