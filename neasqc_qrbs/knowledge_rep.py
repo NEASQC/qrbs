@@ -45,7 +45,7 @@ class Fact(LeftHandSide):
         self.imprecission = imprecission
 
     def __eq__(self, other) -> bool:
-        return self.attribute == other.attribute and self.value == other.value and self.imprecission == other.imprecission
+        return isinstance(other, self.__class__) and self.attribute == other.attribute and self.value == other.value and self.imprecission == other.imprecission
 
     def build(self) -> QRoutine:
         return super().build()
@@ -67,7 +67,7 @@ class AndOperator(LeftHandSide):
         self.rightChild = rightChild
 
     def __eq__(self, other) -> bool:
-        return self.leftChild == other.leftChild and self.rightChild == other.rightChild
+        return isinstance(other, self.__class__) and self.leftChild == other.leftChild and self.rightChild == other.rightChild
 
     def build(self) -> QRoutine:
         return super().build()
@@ -89,7 +89,7 @@ class OrOperator(LeftHandSide):
         self.rightChild = rightChild
 
     def __eq__(self, other) -> bool:
-        return self.leftChild == other.leftChild and self.rightChild == other.rightChild
+        return isinstance(other, self.__class__) and self.leftChild == other.leftChild and self.rightChild == other.rightChild
 
     def build(self) -> QRoutine:
         return super().build()
@@ -110,7 +110,7 @@ class NotOperator(LeftHandSide):
         self.child = child
 
     def __eq__(self, other) -> bool:
-        return self.child == other.child
+        return isinstance(other, self.__class__) and self.child == other.child
 
     def build(self) -> QRoutine:
         return super().build()
@@ -134,7 +134,7 @@ class Rule(Buildable):
         self.uncertainty = uncertainty
 
     def __eq__(self, other) -> bool:
-        return self.lefthandside == other.lefthandside and self.righthandside == other.righthandside and self.uncertainty == other.uncertainty
+        return isinstance(other, self.__class__) and self.lefthandside == other.lefthandside and self.righthandside == other.righthandside and self.uncertainty == other.uncertainty
 
     def build(self) -> QRoutine:
         return super().build()
@@ -154,7 +154,7 @@ class KnowledgeIsland(Buildable):
         self.rules = rules
 
     def __eq__(self, other) -> bool:
-        return self.rules == other.rules
+        return isinstance(other, self.__class__) and self.rules == other.rules
 
     def build(self) -> QRoutine:
         return super().build()
