@@ -46,6 +46,9 @@ class Fact(LeftHandSide):
 
     def __eq__(self, other) -> bool:
         return isinstance(other, self.__class__) and self.attribute == other.attribute and self.value == other.value and self.imprecission == other.imprecission
+    
+    def __contains__(self, other) -> bool:
+        return self.__eq__(other)
 
     def build(self) -> QRoutine:
         return super().build()
@@ -68,6 +71,9 @@ class AndOperator(LeftHandSide):
 
     def __eq__(self, other) -> bool:
         return isinstance(other, self.__class__) and self.leftChild == other.leftChild and self.rightChild == other.rightChild
+    
+    def __contains__(self, child) -> bool:
+        return child == self.leftChild or child == self.rightChild or child in self.leftChild or child in self.rightChild
 
     def build(self) -> QRoutine:
         return super().build()
@@ -90,6 +96,9 @@ class OrOperator(LeftHandSide):
 
     def __eq__(self, other) -> bool:
         return isinstance(other, self.__class__) and self.leftChild == other.leftChild and self.rightChild == other.rightChild
+    
+    def __contains__(self, child) -> bool:
+        return child == self.leftChild or child == self.rightChild or child in self.leftChild or child in self.rightChild
 
     def build(self) -> QRoutine:
         return super().build()
@@ -111,6 +120,9 @@ class NotOperator(LeftHandSide):
 
     def __eq__(self, other) -> bool:
         return isinstance(other, self.__class__) and self.child == other.child
+    
+    def __contains__(self, child) -> bool:
+        return child == self.child or child in self.child
 
     def build(self) -> QRoutine:
         return super().build()
