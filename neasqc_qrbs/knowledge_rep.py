@@ -35,7 +35,7 @@ class Fact(LeftHandSide):
     Attributes:
         attribute (str): Attribute that the fact is representing.
         value (float): Value of the attribute that the fact is representing.
-        imprecission (float, optional): Imprecission of the fact; the certainty of the attribute having said value (0 if not specified).
+        imprecission (float, optional): Imprecission of the fact; the certainty of the attribute having said value (0 if not specified). Must be in range [0,1].
     """
 
     def __init__(self, attribute, value, imprecission=0.0) -> None:
@@ -43,6 +43,17 @@ class Fact(LeftHandSide):
         self.attribute = attribute
         self.value = value
         self.imprecission = imprecission
+        
+    @property
+    def imprecission(self):
+        return self._imprecission
+    
+    @imprecission.setter
+    def imprecission(self, imprecission):
+        if 0.0 <= imprecission <= 1.0:
+            self._imprecission = imprecission
+        else:
+            raise ValueError('Imprecission must be in range [0,1]')
 
     def __eq__(self, other) -> bool:
         return isinstance(other, self.__class__) and self.attribute == other.attribute and self.value == other.value and self.imprecission == other.imprecission
@@ -136,7 +147,7 @@ class Rule(Buildable):
     Attributes:
         leftHandSide (:obj:`LeftHandSide`): Left hand side element of the rule (also known as precedent).
         rightHandSide (:obj:`Fact`): Right hand side element of the rule (also known as consecuent).
-        uncertainty (float, optional): Uncertainty of the relationship between precedent and consecuent (0 if not specified).
+        uncertainty (float, optional): Uncertainty of the relationship between precedent and consecuent (0 if not specified). Must be in range [0,1].
     """
 
     def __init__(self, lefthandside, righthandside, uncertainty=0.0) -> None:
@@ -144,6 +155,17 @@ class Rule(Buildable):
         self.lefthandside = lefthandside
         self.righthandside = righthandside
         self.uncertainty = uncertainty
+        
+    @property
+    def uncertainty(self):
+        return self._uncertainty
+    
+    @uncertainty.setter
+    def uncertainty(self, uncertainty):
+        if 0.0 <= uncertainty <= 1.0:
+            self._uncertainty = uncertainty
+        else:
+            raise ValueError('Uncertainty must be in range [0,1]')
 
     def __eq__(self, other) -> bool:
         return isinstance(other, self.__class__) and self.lefthandside == other.lefthandside and self.righthandside == other.righthandside and self.uncertainty == other.uncertainty

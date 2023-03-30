@@ -4,6 +4,7 @@
 Test for KnowledgeRep elements
 """
 
+import pytest
 from neasqc_qrbs.knowledge_rep import Fact, NotOperator, AndOperator, OrOperator, Rule, KnowledgeIsland
 
 
@@ -137,4 +138,39 @@ class TestKnowledgeIsland:
 
         assert island.rules == [self.rule_2]
 
-        
+
+class TestUncerainty:
+    """
+    Testing imprecission and uncertainty
+    """
+    def test_imprecission(self):
+        """
+        Test imprecission
+        """
+        fact = Fact('fact', 0.5, 0.5)
+        assert fact.imprecission == 0.5
+
+        # Raises an error due to invalid imprecission values
+        with pytest.raises(ValueError) as ex_info:
+            fact.imprecission = -0.5
+        assert ex_info.match(r'Imprecission must be in range \[0,1\]')
+        with pytest.raises(ValueError) as ex_info:
+            fact.imprecission = 1.5
+        assert ex_info.match(r'Imprecission must be in range \[0,1\]')
+
+    def test_uncertainty(self):
+        """
+        Test uncertainty
+        """
+        fact_1 = Fact('fact_1', 0.5)
+        fact_2 = Fact('fact_2', 0.5)
+        rule = Rule(fact_1, fact_2, 0.5)
+        assert rule.uncertainty == 0.5
+
+        # Raises an error due to invalid uncertainty values
+        with pytest.raises(ValueError) as ex_info:
+            rule.uncertainty = -0.5
+        assert ex_info.match(r'Uncertainty must be in range \[0,1\]')
+        with pytest.raises(ValueError) as ex_info:
+            rule.uncertainty = 1.5
+        assert ex_info.match(r'Uncertainty must be in range \[0,1\]')
