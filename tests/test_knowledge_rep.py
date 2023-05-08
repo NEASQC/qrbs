@@ -5,7 +5,8 @@ Test for KnowledgeRep elements
 """
 
 import pytest
-from neasqc_qrbs.knowledge_rep import Fact, NotOperator, AndOperator, OrOperator, Rule, KnowledgeIsland
+from neasqc_qrbs.knowledge_rep import BuilderImpl, Fact, NotOperator, AndOperator, OrOperator, Rule, KnowledgeIsland
+from qat.lang.AQASM import Program
 
 
 class TestFact:
@@ -79,6 +80,13 @@ class TestRule:
         Test rule deletion
         """
         rule = Rule(self.left_hand, self.right_hand)
+
+        # rule_build = Rule(AndOperator(AndOperator(self.in_1, self.in_2),OrOperator(self.in_1, self.in_3)), self.right_hand)
+        # routine = rule_build.build(BuilderImpl)
+        # print(routine)
+        # prog = Program()
+        # qbits = prog.qalloc(routine.arity)
+        # prog.apply(routine, qbits)
 
         del rule
 
