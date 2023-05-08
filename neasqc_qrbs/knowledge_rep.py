@@ -328,6 +328,8 @@ class BuilderImpl(Builder):
             [np.cos(theta), np.sin(theta)],
             [np.sin(theta), -np.cos(theta)]
         ])
+    
+    M = AbstractGate("M", [float], arity=1, matrix_generator=_matrix_gen)
 
     @staticmethod
     def build_fact(fact) -> QRoutine:
@@ -339,10 +341,9 @@ class BuilderImpl(Builder):
         Returns:
             :obj:`QRoutine`: The corresponding quantum routine.
         """
-        M = AbstractGate("M", [float], arity=1, matrix_generator=BuilderImpl._matrix_gen)
 
         routine = QRoutine()
-        routine.apply(M(fact.imprecission), 0)
+        routine.apply(BuilderImpl.M(fact.imprecission), 0)
         return routine
 
     @staticmethod
@@ -424,9 +425,8 @@ class BuilderImpl(Builder):
                 elements[precedent] = routine.max_wire
 
         def build_implication_routine(rule, routine, elements):
-            M = AbstractGate("M", [float], arity=1, matrix_generator=BuilderImpl._matrix_gen)
             routine.new_wires(1)
-            routine.apply(M(rule.uncertainty), routine.max_wire)
+            routine.apply(BuilderImpl.M(rule.uncertainty), routine.max_wire)
             routine.apply(CCNOT, elements[rule.lefthandside], routine.max_wire, elements[rule.righthandside])
         
         rules = island.rules
