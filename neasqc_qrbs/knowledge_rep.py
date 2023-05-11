@@ -322,8 +322,8 @@ class BuilderImpl(Builder):
     """Implementation of Builder interface.
     """
 
-    def _matrix_gen(certainty):
-        theta = certainty * np.pi/2
+    def _matrix_gen(inaccuracy):
+        theta = inaccuracy * np.pi/2
         return np.array([
             [np.cos(theta), np.sin(theta)],
             [np.sin(theta), -np.cos(theta)]
