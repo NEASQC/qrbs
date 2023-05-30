@@ -4,9 +4,10 @@
 Test for QRBS
 """
 
+import random
 import pytest
 from neasqc_qrbs.knowledge_rep import Fact, NotOperator, AndOperator, OrOperator, Rule, KnowledgeIsland
-from neasqc_qrbs.qrbs import WorkingMemory, InferenceEngine, QRBS
+from neasqc_qrbs.qrbs import MyQlmQPU, WorkingMemory, InferenceEngine, QRBS
 
 
 class TestWorkingMemory:
@@ -199,4 +200,125 @@ class TestQRBS:
         with pytest.raises(AttributeError) as ex_info:
             system.retract_fact(fact_1)
         assert ex_info.match('The fact to be retracted is part of a rule and cannot be retracted')
+
+
+class TestEvaluation:
+    """
+    Testing MyQlmQPU evaluation
+    """
+
+    def test_positive_evaluation(self):
+        """
+        Test the positive outcome of the QRBS evaluation
+        """
+        system = QRBS()
+        fact_1 = system.assert_fact('fact_1', 0.8)
+        fact_2 = system.assert_fact('fact_2', 0.3)
+        fact_3 = system.assert_fact('fact_3', 0.5)
+        rule_1 = system.assert_rule(fact_1, fact_2)
+        rule_2 = system.assert_rule(fact_2, fact_3)
+        _ = system.assert_island([rule_1])
+        _ = system.assert_island([rule_1, rule_2])
+
+        assert MyQlmQPU.evaluate(system)
+
+    def test_negative_evaluation(self):
+        """
+        Test the negative outcome of the QRBS evaluation
+        """
+        FACTS = 20
+        system = QRBS()
+        facts = [system.assert_fact('fact_{}'.format(n), random.random()) for n in range(FACTS)]
+        rules = [system.assert_rule(facts[i], facts[i+1], random.random()) for i in range(FACTS - 1)]
+        _ = system.assert_island(rules)
+
+        # Raises an error due to a knowledge island using more qubits than supported
+        with pytest.raises(ValueError) as ex_info:
+            MyQlmQPU.evaluate(system)
+        assert ex_info.match(r'.*A KnowledgeIsland surpases capacity of QPU.*')
+
+
+class TestExecution:
+    """
+    Testing MyQlmQPU execution
+    """
+
+    def test_successful_default(self):
+        """
+        Test the successful default execution
+        """
+        system = QRBS()
+        precedent = system.assert_fact('precedent', 0.8, 1.0)
+        consequent = system.assert_fact('consequent', 0.3)
+        implication = system.assert_rule(precedent, consequent, 1.0)
+        _ = system.assert_island([implication])
+
+        MyQlmQPU.execute(system)
+        assert consequent.imprecission == 1.0
+
+    def test_failed_default_evaluation(self):
+        """
+        Test the failed default evaluation
+        """
+        FACTS = 20
+        system = QRBS()
+        facts = [system.assert_fact('fact_{}'.format(n), random.random()) for n in range(FACTS)]
+        rules = [system.assert_rule(facts[i], facts[i+1], random.random()) for i in range(FACTS - 1)]
+        _ = system.assert_island(rules)
+
+        # Raises an error due to a knowledge island using more qubits than supported
+        with pytest.raises(ValueError) as ex_info:
+            MyQlmQPU.execute(system)
+        assert ex_info.match(r'.*A KnowledgeIsland surpases capacity of QPU.*')
+
+    def test_failed_default_execution(self):
+        """
+        Test the failed default execution
+        """
+        pass
+
+    def test_successful_specified(self):
+        """
+        Test the successful specified execution
+        """
+        system = QRBS()
+        precedent = system.assert_fact('precedent', 0.8, 1.0)
+        consequent = system.assert_fact('consequent', 0.3)
+        implication = system.assert_rule(precedent, consequent, 1.0)
+        island = system.assert_island([implication])
+
+        MyQlmQPU.execute(system, [island])
+        assert consequent.imprecission == 1.0
+
+    def test_failed_specified_evaluation(self):
+        """
+        Test the failed specified evaluation
+        """
+        FACTS = 20
+        system = QRBS()
+        facts = [system.assert_fact('fact_{}'.format(n), random.random()) for n in range(FACTS)]
+        rules = [system.assert_rule(facts[i], facts[i+1], random.random()) for i in range(FACTS - 1)]
+        island = system.assert_island(rules)
+
+        # Raises an error due to a knowledge island using more qubits than supported
+        with pytest.raises(ValueError) as ex_info:
+            MyQlmQPU.execute(system, [island])
+        assert ex_info.match(r'.*A KnowledgeIsland surpases capacity of QPU.*')
+
+    def test_failed_specified_execution(self):
+        """
+        Test the failed specified execution
+        """
+        system_1 = QRBS()
+        precedent = system_1.assert_fact('precedent', 0.8, 1.0)
+        consequent = system_1.assert_fact('consequent', 0.3)
+        implication = system_1.assert_rule(precedent, consequent, 1.0)
+        island_1 = system_1.assert_island([implication])
+
+        system_2 = QRBS()
+
+        # Raises an error due to a knowledge island not being part of the system
+        with pytest.raises(ValueError) as ex_info:
+            MyQlmQPU.execute(system_2, [island_1])
+        assert ex_info.match(r'.*A specified KnowledgeIsland is not part of the QRBS.*')
         

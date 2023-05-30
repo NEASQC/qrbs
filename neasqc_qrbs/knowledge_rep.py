@@ -6,7 +6,7 @@ import numpy as np
 from qat.lang.AQASM import QRoutine, CNOT, CCNOT, X, AbstractGate, H
 
 
-class Buildable(ABC):
+class Buildable(ABC): # pragma: no cover
     """Interface for knowledge elements that can be built into quantum routines.
     """
 
@@ -18,7 +18,7 @@ class Buildable(ABC):
         pass
 
 
-class LeftHandSide(Buildable):
+class LeftHandSide(Buildable): # pragma: no cover
     """Interface for elements that can be part of the left hand side of a rule. This class is used to model the Composite design pattern, acting as the Component interface.
     """
 
@@ -244,7 +244,7 @@ class KnowledgeIsland(Buildable):
         return routine
     
 
-class Builder(ABC):
+class Builder(ABC): # pragma: no cover
     """Interface for building the corresponding quantum routine from a Buildable element.
     """
 

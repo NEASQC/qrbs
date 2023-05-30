@@ -2,7 +2,9 @@
 
 from abc import ABC, abstractmethod
 
-from .knowledge_rep import Fact, Rule, KnowledgeIsland
+from .knowledge_rep import BuilderImpl, Fact, Rule, KnowledgeIsland
+from qat.lang.AQASM import Program
+from qat.pylinalg import PyLinalg
 
 
 class WorkingMemory():
@@ -161,10 +163,10 @@ class QRBS():
         Args:
             attribute (str): The attribute of the fact.
             value (float): The value of the fact.
-            imprecission (float, optional): The imprecission of the rule.
+            imprecission (float, optional): The imprecission of the fact.
 
         Returns:
-            :obj:`Rule`: The asserted rule.
+            :obj:`Fact`: The asserted fact.
         """
         fact = Fact(attribute, value, imprecission)
         return self._memory.assert_fact(fact)
@@ -221,57 +223,29 @@ class QRBS():
             island (:obj:`KnowledgeIsland`): The knowledge island to be retracted.
         """
         self._engine.retract_island(island)
-        
+      
 
-class QRBSHandler():
-    """Class encapsulating QRBS handling methods. 
-    
-    This class proporcionates several methods to handle operations related to Quantum Rule-Based Systems, such as their evaluation or execution.
+class QPU(ABC): # pragma: no cover
+    """Interface defining the structure to implement Quantum Processing Units (QPU).
     """
-
+        
     @staticmethod
-    def evaluate(qrbs, qpu) -> None:
-        """Evaluates whether a QRBS can be executed on a QPU.
+    @abstractmethod
+    def evaluate(qrbs) -> bool:
+        """Evaluates whether a QRBS can be executed on this QPU.
 
         Args:
             qrbs (:obj:`QRBS`): The QRBS to be evaluated.
-            qpu (:obj:`QPU`): The QPU in which the QRBS must be evaluated.
         """
         pass
 
     @staticmethod
-    def execute(qrbs, qpu) -> None:
-        """Executes the QRBS on the QPU.
+    @abstractmethod
+    def execute(qrbs) -> None:
+        """Executes the QRBS on this QPU.
 
         Args:
             qrbs (:obj:`QRBS`): The QRBS to be executed.
-            qpu (:obj:`QPU`): The QPU in which the QRBS must be executed.
-        """
-        pass
-      
-
-class QPU(ABC):
-    """Interface defining the structure to implement Quantum Processing Units (QPU).
-    """
-
-    def __init__(self) -> None:
-        super().__init__()
-        
-    @abstractmethod
-    def evaluate(circuit) -> None:
-        """Evaluates whether a quantum circuit can be executed on this QPU.
-
-        Args:
-            circuit (:obj:`Circuit`): The circuit to be evaluated.
-        """
-        pass
-
-    @abstractmethod
-    def execute(circuit) -> None:
-        """Executes the circuit on this QPU.
-
-        Args:
-            circuit (:obj:`Circuit`): The circuit to be executed.
         """
         pass
       
@@ -280,21 +254,67 @@ class MyQlmQPU(QPU):
     """ myQLM implementation of a Quantum Processing Unit (QPU).
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    MAX_ARITY = 20
         
-    def evaluate(circuit) -> None:
-        """Evaluates whether a quantum circuit can be executed on this QPU.
+    @staticmethod
+    def evaluate(qrbs, islands=[]) -> bool:
+        """Evaluates whether a QRBS can be executed on this QPU.
 
         Args:
-            circuit (:obj:`Circuit`): The circuit to be evaluated.
-        """
-        pass
+            qrbs (:obj:`QRBS`): The QRBS to be evaluated.
+            eval_islands (List[:obj:`KnowledgeIsland`], optional): A list of specific KnowledgeIsland to be evaluated.
 
-    def execute(circuit) -> None:
-        """Executes the circuit on this QPU.
+        Raises:
+            ValueError: In case an specified knowledge island is not part of the QRBS or an evaluated knowledge island requires more qubits than supported.
+        """
+        evaluation = True
+        # Initiate islands in case of specified evaluation
+        if islands == []:
+            islands = qrbs._engine._islands
+        else:
+            for island in islands:
+                if island not in qrbs._engine._islands:
+                    raise ValueError('A specified KnowledgeIsland is not part of the QRBS', island)
+        # Build each island
+        islands = [BuilderImpl.build_island(island) for island in islands]
+        # Check their arity is compatible with the QPU
+        for island in islands:
+            routine, _ = island
+            if routine.arity > MyQlmQPU.MAX_ARITY:
+                evaluation = False
+                raise ValueError('A KnowledgeIsland surpases capacity of QPU ({} qubits)'.format(MyQlmQPU.MAX_ARITY), qrbs._engine._islands[islands.index(island)])
+        return evaluation
+
+    @staticmethod
+    def execute(qrbs, islands=[]) -> None:
+        """Executes the QRBS on this QPU.
 
         Args:
-            circuit (:obj:`Circuit`): The circuit to be executed.
+            qrbs (:obj:`QRBS`): The QRBS to be executed.
+            islands (List[:obj:`KnowledgeIsland`], optional): A list of specific KnowledgeIsland to be executed.
         """
-        pass
+        # Initiate islands in case of specified evaluation
+        if islands == []:
+            islands = qrbs._engine._islands
+        # If evaluation is successful, continue with execution
+        if MyQlmQPU.evaluate(qrbs, islands):
+            for island in islands:
+                routine, elements = BuilderImpl.build_island(island)
+
+                prog = Program()
+                qbits = prog.qalloc(routine.arity)
+                prog.apply(routine, qbits)
+
+                circ = prog.to_circ()
+                job = circ.to_job(nbshots=1024)
+                linalgqpu = PyLinalg()
+                result = linalgqpu.submit(job)
+
+                for element, index in elements.items():
+                    if element in [rule.righthandside for rule in qrbs._engine._rules]:
+                        temp = 0
+                        for sample in result:
+                            if sample.state.bitstring[index] == '1':
+                                temp += sample.probability
+                        element.imprecission = temp
+                
