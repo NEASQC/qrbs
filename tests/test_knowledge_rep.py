@@ -5,7 +5,8 @@ Test for KnowledgeRep elements
 """
 
 import pytest
-from neasqc_qrbs.knowledge_rep import Fact, NotOperator, AndOperator, OrOperator, Rule, KnowledgeIsland
+from neasqc_qrbs.knowledge_rep import BuilderImpl, Fact, NotOperator, AndOperator, OrOperator, Rule, KnowledgeIsland
+from qat.lang.AQASM import QRoutine, Program, CCNOT, CNOT, X
 
 
 class TestFact:
@@ -174,3 +175,136 @@ class TestUncerainty:
         with pytest.raises(ValueError) as ex_info:
             rule.uncertainty = 1.5
         assert ex_info.match(r'Uncertainty must be in range \[0,1\]')
+
+
+class TestBuilder:
+    """
+    Testing BuilderImpl
+    """
+    in_1 = Fact('lh_1', 1.0)
+    in_2 = Fact('lh_2', 0.7)
+    in_3 = Fact('lh_3', 0.5)
+
+    not_op = NotOperator(in_2)
+    or_op = OrOperator(in_1, not_op)
+    right_hand_1 = Fact('rh_1', 0.5)
+    rule_1 = Rule(or_op, right_hand_1)
+
+    and_op = AndOperator(right_hand_1, in_3)
+    right_hand_2 = Fact('rh_2', 0.0)
+    rule_2 = Rule(and_op, right_hand_2)
+
+    island = KnowledgeIsland([rule_1, rule_2])
+
+    def _build_circ(self, routine):
+        prog = Program()
+        qbits = prog.qalloc(routine.arity)
+        prog.apply(routine, qbits)
+        return prog
+
+    def test_build_fact(self):
+        """
+        Test building fact
+        """
+        built_routine = self.in_1.build(BuilderImpl)
+
+        test_routine = QRoutine()
+        test_routine.apply(BuilderImpl.M(self.in_1.imprecission), 0)
+        
+        [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
+
+        for (built_op, test_op) in zip(built_circ.iterate_simple(), test_circ.iterate_simple()):
+            assert built_op == test_op
+
+    def test_build_and(self):
+        """
+        Test building and operator
+        """
+        built_routine = self.and_op.build(BuilderImpl)
+
+        test_routine = QRoutine()
+        test_routine.apply(CCNOT, 0, 1, 2)
+        
+        [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
+
+        for (built_op, test_op) in zip(built_circ.iterate_simple(), test_circ.iterate_simple()):
+            assert built_op == test_op
+
+    def test_build_or(self):
+        """
+        Test building or operator
+        """
+        built_routine = self.or_op.build(BuilderImpl)
+
+        test_routine = QRoutine()
+        test_routine.apply(CCNOT, 0, 1, 2)
+        test_routine.apply(CNOT, 0, 2)
+        test_routine.apply(CNOT, 1, 2)
+        
+        [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
+
+        for (built_op, test_op) in zip(built_circ.iterate_simple(), test_circ.iterate_simple()):
+            assert built_op == test_op
+
+    def test_build_not(self):
+        """
+        Test building not operator
+        """
+        built_routine = self.not_op.build(BuilderImpl)
+
+        test_routine = QRoutine()
+        test_routine.apply(CNOT, 0, 1)
+        test_routine.apply(X, 1)
+        
+        [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
+
+        for (built_op, test_op) in zip(built_circ.iterate_simple(), test_circ.iterate_simple()):
+            assert built_op == test_op
+
+    def test_build_rule(self):
+        """
+        Test building rule
+        """
+        built_routine = self.rule_1.build(BuilderImpl)
+
+        test_routine = QRoutine()
+        test_routine.apply(BuilderImpl.M(self.in_1.imprecission), 0)
+        test_routine.apply(BuilderImpl.M(self.in_2.imprecission), 1)
+        test_routine.apply(CNOT, 1, 3)
+        test_routine.apply(X, 3)
+        test_routine.apply(CCNOT, 0, 3, 4)
+        test_routine.apply(CNOT, 0, 4)
+        test_routine.apply(CNOT, 3, 4)
+        test_routine.apply(BuilderImpl.M(self.rule_1.uncertainty), 5)
+        test_routine.apply(CCNOT, 4, 5, 2)
+        
+        [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
+
+        for (built_op, test_op) in zip(built_circ.iterate_simple(), test_circ.iterate_simple()):
+            assert built_op == test_op
+
+    def test_build_island(self):
+        """
+        Test building island
+        """
+        built_routine = self.island.build(BuilderImpl)
+
+        test_routine = QRoutine()
+        test_routine.apply(BuilderImpl.M(self.in_1.imprecission), 0)
+        test_routine.apply(BuilderImpl.M(self.in_2.imprecission), 1)
+        test_routine.apply(BuilderImpl.M(self.in_3.imprecission), 2)
+        test_routine.apply(CNOT, 1, 5)
+        test_routine.apply(X, 5)
+        test_routine.apply(CCNOT, 0, 5, 6)
+        test_routine.apply(CNOT, 0, 6)
+        test_routine.apply(CNOT, 5, 6)
+        test_routine.apply(BuilderImpl.M(self.rule_1.uncertainty), 7)
+        test_routine.apply(CCNOT, 6, 7, 3)
+        test_routine.apply(CCNOT, 3, 2, 8)
+        test_routine.apply(BuilderImpl.M(self.rule_2.uncertainty), 9)
+        test_routine.apply(CCNOT, 8, 9, 4)
+        
+        [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
+
+        for (built_op, test_op) in zip(built_circ.iterate_simple(), test_circ.iterate_simple()):
+            assert built_op == test_op

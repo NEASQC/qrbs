@@ -7,3 +7,6 @@ doc/build
 # Packaging
 dist/*
 *.egg-info
+
+# Testing
+.coverage
