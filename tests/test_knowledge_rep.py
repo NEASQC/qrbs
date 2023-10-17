@@ -405,8 +405,8 @@ class TestBuilderFuzzy:
         built_routine = self.rule_1.build(BuilderFuzzy)
 
         test_routine = QRoutine()
-        test_routine.apply(RY(self.in_1.imprecission * np.pi/2), 0)
-        test_routine.apply(RY(self.in_2.imprecission * np.pi/2), 1)
+        test_routine.apply(RY(self.in_1.imprecission * np.pi), 0)
+        test_routine.apply(RY(self.in_2.imprecission * np.pi), 1)
         test_routine.apply(CNOT, 1, 3)
         test_routine.apply(X, 3)
         test_routine.apply(X, 0)
@@ -415,7 +415,7 @@ class TestBuilderFuzzy:
         test_routine.apply(X, 0)
         test_routine.apply(X, 3)
         test_routine.apply(X, 4)
-        test_routine.apply(RY(self.rule_1.uncertainty * np.pi/2), 5)
+        test_routine.apply(RY(self.rule_1.uncertainty * np.pi), 5)
         test_routine.apply(CCNOT, 4, 5, 2)
         
         [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
@@ -430,9 +430,9 @@ class TestBuilderFuzzy:
         built_routine = self.island.build(BuilderFuzzy)
 
         test_routine = QRoutine()
-        test_routine.apply(RY(self.in_1.imprecission * np.pi/2), 0)
-        test_routine.apply(RY(self.in_2.imprecission * np.pi/2), 1)
-        test_routine.apply(RY(self.in_3.imprecission * np.pi/2), 2)
+        test_routine.apply(RY(self.in_1.imprecission * np.pi), 0)
+        test_routine.apply(RY(self.in_2.imprecission * np.pi), 1)
+        test_routine.apply(RY(self.in_3.imprecission * np.pi), 2)
         test_routine.apply(CNOT, 1, 5)
         test_routine.apply(X, 5)
         test_routine.apply(X, 0)
@@ -441,10 +441,10 @@ class TestBuilderFuzzy:
         test_routine.apply(X, 0)
         test_routine.apply(X, 5)
         test_routine.apply(X, 6)
-        test_routine.apply(RY(self.rule_1.uncertainty * np.pi/2), 7)
+        test_routine.apply(RY(self.rule_1.uncertainty * np.pi), 7)
         test_routine.apply(CCNOT, 6, 7, 3)
         test_routine.apply(CCNOT, 3, 2, 8)
-        test_routine.apply(RY(self.rule_2.uncertainty * np.pi/2), 9)
+        test_routine.apply(RY(self.rule_2.uncertainty * np.pi), 9)
         test_routine.apply(CCNOT, 8, 9, 4)
         
         [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]

@@ -464,7 +464,7 @@ class BuilderFuzzy(Builder):
         """
 
         routine = QRoutine()
-        routine.apply(RY(fact.imprecission * np.pi/2), 0)
+        routine.apply(RY(fact.imprecission * np.pi), 0)
         return routine
 
     @staticmethod
@@ -550,7 +550,7 @@ class BuilderFuzzy(Builder):
 
         def build_implication_routine(rule, routine, elements):
             routine.new_wires(1)
-            routine.apply(RY(rule.uncertainty * np.pi/2), routine.max_wire)
+            routine.apply(RY(rule.uncertainty * np.pi), routine.max_wire)
             routine.apply(CCNOT, elements[rule.lefthandside], routine.max_wire, elements[rule.righthandside])
         
         rules = island.rules
