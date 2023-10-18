@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 
-from .knowledge_rep import BuilderImpl, Fact, Rule, KnowledgeIsland
+from .knowledge_rep import BuilderFuzzy, BuilderImpl, Fact, Rule, KnowledgeIsland
 from qat.lang.AQASM import Program
 from qat.pylinalg import PyLinalg
 
@@ -257,7 +257,7 @@ class MyQlmQPU(QPU):
     MAX_ARITY = 20
         
     @staticmethod
-    def evaluate(qrbs, islands=[]) -> bool:
+    def evaluate(qrbs, islands=[], model='cf') -> bool:
         """Evaluates whether a QRBS can be executed on this QPU.
 
         Args:
@@ -276,7 +276,8 @@ class MyQlmQPU(QPU):
                 if island not in qrbs._engine._islands:
                     raise ValueError('A specified KnowledgeIsland is not part of the QRBS', island)
         # Build each island
-        islands = [BuilderImpl.build_island(island) for island in islands]
+        builder = BuilderFuzzy if model == 'fuzzy' else BuilderImpl
+        islands = [builder.build_island(island) for island in islands]
         # Check their arity is compatible with the QPU
         for island in islands:
             routine, _ = island
@@ -286,20 +287,22 @@ class MyQlmQPU(QPU):
         return evaluation
 
     @staticmethod
-    def execute(qrbs, islands=[]) -> None:
+    def execute(qrbs, islands=[], model='cf') -> None:
         """Executes the QRBS on this QPU.
 
         Args:
             qrbs (:obj:`QRBS`): The QRBS to be executed.
             islands (List[:obj:`KnowledgeIsland`], optional): A list of specific KnowledgeIsland to be executed.
         """
+        # Select builder
+        builder = BuilderFuzzy if model == 'fuzzy' else BuilderImpl
         # Initiate islands in case of specified evaluation
         if islands == []:
             islands = qrbs._engine._islands
         # If evaluation is successful, continue with execution
         if MyQlmQPU.evaluate(qrbs, islands):
             for island in islands:
-                routine, elements = BuilderImpl.build_island(island)
+                routine, elements = builder.build_island(island)
 
                 prog = Program()
                 qbits = prog.qalloc(routine.arity)
