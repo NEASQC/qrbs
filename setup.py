@@ -24,7 +24,7 @@ class PyTest(TestCommand):
 
 setup(
     name="neasqc_qrbs",
-    version="0.0.2",
+    version="0.1.0",
     author="Samuel Magaz-Romero",
     author_email="s.magazr@udc.es",
     license="European Union Public License 1.2",
