@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 
-from .knowledge_rep import BuilderFuzzy, BuilderImpl, Fact, Rule, KnowledgeIsland
+from .knowledge_rep import BuilderBayes, BuilderFuzzy, BuilderImpl, Fact, Rule, KnowledgeIsland
 from qat.lang.AQASM import Program
 from qat.pylinalg import PyLinalg
 
@@ -255,6 +255,11 @@ class MyQlmQPU(QPU):
     """
 
     MAX_ARITY = 20
+    BUILDERS = {
+        'cf': BuilderImpl,
+        'fuzzy': BuilderFuzzy,
+        'bayes': BuilderBayes
+    }
         
     @staticmethod
     def evaluate(qrbs, islands=[], model='cf') -> bool:
@@ -276,7 +281,7 @@ class MyQlmQPU(QPU):
                 if island not in qrbs._engine._islands:
                     raise ValueError('A specified KnowledgeIsland is not part of the QRBS', island)
         # Build each island
-        builder = BuilderFuzzy if model == 'fuzzy' else BuilderImpl
+        builder = MyQlmQPU.BUILDERS[model]
         islands = [builder.build_island(island) for island in islands]
         # Check their arity is compatible with the QPU
         for island in islands:
@@ -295,7 +300,7 @@ class MyQlmQPU(QPU):
             islands (List[:obj:`KnowledgeIsland`], optional): A list of specific KnowledgeIsland to be executed.
         """
         # Select builder
-        builder = BuilderFuzzy if model == 'fuzzy' else BuilderImpl
+        builder = MyQlmQPU.BUILDERS[model]
         # Initiate islands in case of specified evaluation
         if islands == []:
             islands = qrbs._engine._islands
