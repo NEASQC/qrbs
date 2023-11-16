@@ -570,3 +570,138 @@ class BuilderFuzzy(Builder):
             build_precedent_routine(rule.lefthandside, routine, elements)
             build_implication_routine(rule, routine, elements)
         return routine, elements
+
+
+class BuilderBayes(Builder):
+    """Implementation of Builder interface for the bayesian model.
+    """
+
+    def _matrix_gen(inaccuracy):
+        theta = (inaccuracy * np.pi) / 2
+        return np.array([
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, np.cos(theta), -np.sin(theta)],
+            [0, 0, np.sin(theta), np.cos(theta)]
+        ])
+    
+    CRY = AbstractGate("CRY", [float], arity=2, matrix_generator=_matrix_gen)
+
+    @staticmethod
+    def build_fact(fact) -> QRoutine:
+        """Builds the quantum routine of a fact.
+
+        Args:
+            fact (:obj:`Fact`): The Fact whose quantum routine is being built. 
+        
+        Returns:
+            :obj:`QRoutine`: The corresponding quantum routine.
+        """
+
+        routine = QRoutine()
+        routine.apply(RY(fact.imprecission * np.pi), 0)
+        return routine
+
+    @staticmethod
+    def build_and() -> QRoutine:
+        """Builds the quantum routine of an and operator.
+        
+        Returns:
+            :obj:`QRoutine`: The corresponding quantum routine.
+        """
+        routine = QRoutine()
+        routine.apply(CCNOT, 0, 1, 2)
+        return routine
+
+    @staticmethod
+    def build_or() -> QRoutine:
+        """Builds the quantum routine of an or operator.
+        
+        Returns:
+            :obj:`QRoutine`: The corresponding quantum routine.
+        """
+        routine = QRoutine()
+        routine.apply(X, 0)
+        routine.apply(CCNOT, 0, 1, 2)
+        routine.apply(X, 0)
+        routine.apply(X, 1)
+        routine.apply(CCNOT, 0, 1, 2)
+        routine.apply(X, 1)
+        routine.apply(CCNOT, 0, 1, 2)
+        return routine
+
+    @staticmethod
+    def build_not() -> QRoutine:
+        """Builds the quantum routine of a not operator.
+        
+        Returns:
+            :obj:`QRoutine`: The corresponding quantum routine.
+        """
+        routine = QRoutine()
+        routine.apply(CNOT, 0, 1)
+        routine.apply(X, 1)
+        return routine
+
+    @staticmethod
+    def build_rule(rule) -> QRoutine:
+        """Builds the quantum routine of a rule.
+
+        Args:
+            rule (:obj:`Rule`): The Rule whose quantum routine is being built. 
+        
+        Returns:
+            :obj:`QRoutine`: The corresponding quantum routine.
+        """
+        routine, _ = BuilderBayes.build_island(KnowledgeIsland([rule]))
+        return routine
+    
+    @staticmethod
+    def build_island(island) -> Tuple[QRoutine, Dict[LeftHandSide, int]]:
+        """Builds the quantum routine of a knowledge island.
+
+        Args:
+            island (:obj:`KnowledgeIsland`): The KnowledgeIsland whose quantum routine is being built. 
+        
+        Returns:
+            Tuple[:obj:`QRoutine`, Dict[:obj:`LeftHandSide`, int]]: A tuple containing the corresponding quantum routine and the index of which qubit corresponds to each LeftHandSide element.
+        """
+        def build_precedent_routine(precedent, routine, elements):
+            if isinstance(precedent, Fact):
+                return
+            else:
+                qbits = []
+                if isinstance(precedent, NotOperator):
+                    if precedent.child not in elements:
+                        build_precedent_routine(precedent.child, routine, elements)
+                    qbits.extend([elements[precedent.child]])
+                else: # isinstance(precedent, AndOperator or OrOperator)
+                    if precedent.left_child not in elements:
+                        build_precedent_routine(precedent.left_child, routine, elements)
+                    if precedent.right_child not in elements:
+                        build_precedent_routine(precedent.right_child, routine, elements)
+                    qbits.extend([elements[precedent.left_child], elements[precedent.right_child]])
+                qbits.extend([routine.new_wires(1)])
+                routine.apply(precedent.build(BuilderBayes), qbits)
+                elements[precedent] = routine.max_wire
+
+        def build_implication_routine(rule, routine, elements):
+            routine.apply(BuilderBayes.CRY(rule.uncertainty), elements[rule.lefthandside], elements[rule.righthandside])
+        
+        rules = island.rules
+        rules.sort()
+        elements = {}
+        routine = QRoutine()
+        for rule in rules:
+            for fact in rule.lefthandside:
+                if fact not in [rule.righthandside for rule in rules] and fact not in elements.keys():
+                    routine.new_wires(1)
+                    elements[fact] = routine.max_wire
+                    routine.apply(fact.build(BuilderBayes), elements[fact])
+        for rule in rules:
+            routine.new_wires(1)
+            elements[rule.righthandside] = routine.max_wire
+        for rule in rules:
+            build_precedent_routine(rule.lefthandside, routine, elements)
+            build_implication_routine(rule, routine, elements)
+        return routine, elements
+    
