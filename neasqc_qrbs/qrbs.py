@@ -305,7 +305,7 @@ class MyQlmQPU(QPU):
         if islands == []:
             islands = qrbs._engine._islands
         # If evaluation is successful, continue with execution
-        if MyQlmQPU.evaluate(qrbs, islands):
+        if MyQlmQPU.evaluate(qrbs, islands, model):
             for island in islands:
                 routine, elements = builder.build_island(island)
 
