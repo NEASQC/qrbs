@@ -502,7 +502,7 @@ class TestExecutionBayes:
         """
         Test the failed default evaluation
         """
-        FACTS = 20
+        FACTS = 30
         system = QRBS()
         facts = [system.assert_fact('fact_{}'.format(n), random.random()) for n in range(FACTS)]
         rules = [system.assert_rule(facts[i], facts[i+1], random.random()) for i in range(FACTS - 1)]
@@ -536,7 +536,7 @@ class TestExecutionBayes:
         """
         Test the failed specified evaluation
         """
-        FACTS = 20
+        FACTS = 30
         system = QRBS()
         facts = [system.assert_fact('fact_{}'.format(n), random.random()) for n in range(FACTS)]
         rules = [system.assert_rule(facts[i], facts[i+1], random.random()) for i in range(FACTS - 1)]
