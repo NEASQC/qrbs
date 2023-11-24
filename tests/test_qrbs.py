@@ -18,7 +18,7 @@ class TestWorkingMemory:
     fact_2 = Fact('fact_2', 0.7)
     fact_3 = Fact('fact_3', 0.5)
 
-    def test_workingmemory_creation(self):
+    def test_working_memory_creation(self):
         """
         Test working memory creation
         """
@@ -29,7 +29,7 @@ class TestWorkingMemory:
         assert working_memory_1 != working_memory_2
         assert working_memory_2 == working_memory_2_copy
 
-    def test_workingmemory_deletion(self):
+    def test_working_memory_deletion(self):
         """
         Test working memory deletion
         """
@@ -37,7 +37,7 @@ class TestWorkingMemory:
 
         del working_memory
 
-    def test_workingmemory_modification(self):
+    def test_working_memory_modification(self):
         """
         Test working memory modification
         """
@@ -75,7 +75,7 @@ class TestInferenceEngine:
     island_2 = KnowledgeIsland([rule_1, rule_2])
     island_3 = KnowledgeIsland([rule_1, rule_3])
 
-    def test_inferenceengine_creation(self):
+    def test_inference_engine_creation(self):
         """
         Test inference engine creation
         """
@@ -96,7 +96,7 @@ class TestInferenceEngine:
             _ = InferenceEngine([self.rule_1, self.rule_2, self.rule_3], [self.island_3])
         assert ex_info.match('The rules of the knowledge island are not chained')
 
-    def test_inferenceengine_deletion(self):
+    def test_inference_engine_deletion(self):
         """
         Test inference engine deletion
         """
@@ -104,7 +104,7 @@ class TestInferenceEngine:
 
         del inference_engine
 
-    def test_inferenceengine_modification(self):
+    def test_inference_engine_modification(self):
         """
         Test inference engine modification
         """
@@ -235,7 +235,7 @@ class TestEvaluation:
         # Raises an error due to a knowledge island using more qubits than supported
         with pytest.raises(ValueError) as ex_info:
             MyQlmQPU.evaluate(system)
-        assert ex_info.match(r'.*A KnowledgeIsland surpases capacity of QPU.*')
+        assert ex_info.match(r'.*A KnowledgeIsland surpasses capacity of QPU.*')
 
 
 class TestExecution:
@@ -254,7 +254,7 @@ class TestExecution:
         _ = system.assert_island([implication])
 
         MyQlmQPU.execute(system)
-        assert consequent.imprecission == 1.0
+        assert consequent.precision == 1.0
 
     def test_failed_default_evaluation(self):
         """
@@ -269,7 +269,7 @@ class TestExecution:
         # Raises an error due to a knowledge island using more qubits than supported
         with pytest.raises(ValueError) as ex_info:
             MyQlmQPU.execute(system)
-        assert ex_info.match(r'.*A KnowledgeIsland surpases capacity of QPU.*')
+        assert ex_info.match(r'.*A KnowledgeIsland surpasses capacity of QPU.*')
 
     def test_failed_default_execution(self):
         """
@@ -288,7 +288,7 @@ class TestExecution:
         island = system.assert_island([implication])
 
         MyQlmQPU.execute(system, [island])
-        assert consequent.imprecission == 1.0
+        assert consequent.precision == 1.0
 
     def test_failed_specified_evaluation(self):
         """
@@ -303,7 +303,7 @@ class TestExecution:
         # Raises an error due to a knowledge island using more qubits than supported
         with pytest.raises(ValueError) as ex_info:
             MyQlmQPU.execute(system, [island])
-        assert ex_info.match(r'.*A KnowledgeIsland surpases capacity of QPU.*')
+        assert ex_info.match(r'.*A KnowledgeIsland surpasses capacity of QPU.*')
 
     def test_failed_specified_execution(self):
         """
@@ -356,7 +356,7 @@ class TestEvaluationFuzzy:
         # Raises an error due to a knowledge island using more qubits than supported
         with pytest.raises(ValueError) as ex_info:
             MyQlmQPU.evaluate(system, model='fuzzy')
-        assert ex_info.match(r'.*A KnowledgeIsland surpases capacity of QPU.*')
+        assert ex_info.match(r'.*A KnowledgeIsland surpasses capacity of QPU.*')
 
 
 class TestExecutionFuzzy:
@@ -375,7 +375,7 @@ class TestExecutionFuzzy:
         _ = system.assert_island([implication])
 
         MyQlmQPU.execute(system, model='fuzzy')
-        assert consequent.imprecission == 1.0
+        assert consequent.precision == 1.0
 
     def test_failed_default_evaluation(self):
         """
@@ -390,7 +390,7 @@ class TestExecutionFuzzy:
         # Raises an error due to a knowledge island using more qubits than supported
         with pytest.raises(ValueError) as ex_info:
             MyQlmQPU.execute(system, model='fuzzy')
-        assert ex_info.match(r'.*A KnowledgeIsland surpases capacity of QPU.*')
+        assert ex_info.match(r'.*A KnowledgeIsland surpasses capacity of QPU.*')
 
     def test_failed_default_execution(self):
         """
@@ -409,7 +409,7 @@ class TestExecutionFuzzy:
         island = system.assert_island([implication])
 
         MyQlmQPU.execute(system, [island], model='fuzzy')
-        assert consequent.imprecission == 1.0
+        assert consequent.precision == 1.0
 
     def test_failed_specified_evaluation(self):
         """
@@ -424,7 +424,7 @@ class TestExecutionFuzzy:
         # Raises an error due to a knowledge island using more qubits than supported
         with pytest.raises(ValueError) as ex_info:
             MyQlmQPU.execute(system, [island], model='fuzzy')
-        assert ex_info.match(r'.*A KnowledgeIsland surpases capacity of QPU.*')
+        assert ex_info.match(r'.*A KnowledgeIsland surpasses capacity of QPU.*')
 
     def test_failed_specified_execution(self):
         """
@@ -477,7 +477,7 @@ class TestEvaluationBayes:
         # Raises an error due to a knowledge island using more qubits than supported
         with pytest.raises(ValueError) as ex_info:
             MyQlmQPU.evaluate(system, model='bayes')
-        assert ex_info.match(r'.*A KnowledgeIsland surpases capacity of QPU.*')
+        assert ex_info.match(r'.*A KnowledgeIsland surpasses capacity of QPU.*')
 
 
 class TestExecutionBayes:
@@ -496,7 +496,7 @@ class TestExecutionBayes:
         _ = system.assert_island([implication])
 
         MyQlmQPU.execute(system, model='bayes')
-        assert consequent.imprecission == 1.0
+        assert consequent.precision == 1.0
 
     def test_failed_default_evaluation(self):
         """
@@ -511,7 +511,7 @@ class TestExecutionBayes:
         # Raises an error due to a knowledge island using more qubits than supported
         with pytest.raises(ValueError) as ex_info:
             MyQlmQPU.execute(system, model='bayes')
-        assert ex_info.match(r'.*A KnowledgeIsland surpases capacity of QPU.*')
+        assert ex_info.match(r'.*A KnowledgeIsland surpasses capacity of QPU.*')
 
     def test_failed_default_execution(self):
         """
@@ -530,7 +530,7 @@ class TestExecutionBayes:
         island = system.assert_island([implication])
 
         MyQlmQPU.execute(system, [island], model='bayes')
-        assert consequent.imprecission == 1.0
+        assert consequent.precision == 1.0
 
     def test_failed_specified_evaluation(self):
         """
@@ -545,7 +545,7 @@ class TestExecutionBayes:
         # Raises an error due to a knowledge island using more qubits than supported
         with pytest.raises(ValueError) as ex_info:
             MyQlmQPU.execute(system, [island], model='bayes')
-        assert ex_info.match(r'.*A KnowledgeIsland surpases capacity of QPU.*')
+        assert ex_info.match(r'.*A KnowledgeIsland surpasses capacity of QPU.*')
 
     def test_failed_specified_execution(self):
         """
