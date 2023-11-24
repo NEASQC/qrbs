@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'NEASQC documentation'
-copyright = 'UDC 2021-2022'
+copyright = 'UDC 2021-2023'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
