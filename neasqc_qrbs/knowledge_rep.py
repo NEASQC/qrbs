@@ -6,27 +6,27 @@ import numpy as np
 from qat.lang.AQASM import QRoutine, CNOT, CCNOT, X, AbstractGate, RY
 
 
-class Buildable(ABC): # pragma: no cover
+class Buildable(ABC):  # pragma: no cover
     """Interface for knowledge elements that can be built into quantum routines.
     """
 
     def __init__(self) -> None:
         super().__init__()
-    
+
     @abstractmethod
     def build(self, builder) -> QRoutine:
         pass
 
 
-class LeftHandSide(Buildable): # pragma: no cover
+class LeftHandSide(Buildable):  # pragma: no cover
     """Interface for elements that can be part of the left hand side of a rule. This class is used to model the Composite design pattern, acting as the Component interface.
     """
 
     def __init__(self) -> None:
         super().__init__()
-    
-    def build(self) -> QRoutine:
-        return super().build()
+
+    def build(self, builder) -> QRoutine:
+        pass
 
 
 class Fact(LeftHandSide):
@@ -37,44 +37,44 @@ class Fact(LeftHandSide):
     Attributes:
         attribute (str): Attribute that the fact is representing.
         value (float): Value of the attribute that the fact is representing.
-        imprecission (float, optional): Imprecission of the fact; the certainty of the attribute having said value (0 if not specified). Must be in range [0,1].
+        precision (float, optional): Precision of the fact; the certainty of the attribute having said value (0 if not specified). Must be in range [0,1].
     """
 
-    def __init__(self, attribute, value, imprecission=0.0) -> None:
+    def __init__(self, attribute, value, precision=0.0) -> None:
         super().__init__()
         self.attribute = attribute
         self.value = value
-        self.imprecission = imprecission
-        
+        self.precision = precision
+
     @property
-    def imprecission(self):
-        return self._imprecission
-    
-    @imprecission.setter
-    def imprecission(self, imprecission):
-        if 0.0 <= imprecission <= 1.0:
-            self._imprecission = imprecission
+    def precision(self):
+        return self._precision
+
+    @precision.setter
+    def precision(self, precision):
+        if 0.0 <= precision <= 1.0:
+            self._precision = precision
         else:
-            raise ValueError('Imprecission must be in range [0,1]')
+            raise ValueError('Precision must be in range [0,1]')
 
     def __eq__(self, other) -> bool:
-        return isinstance(other, self.__class__) and self.attribute == other.attribute and self.value == other.value and self.imprecission == other.imprecission
-    
+        return isinstance(other, self.__class__) and self.attribute == other.attribute and self.value == other.value and self.precision == other.precision
+
     def __contains__(self, other) -> bool:
         return self.__eq__(other)
-    
+
     def __str__(self) -> str:
-        return 'Fact(' + str(self.attribute) + ', ' + str(self.value) + ', ' + str(self.imprecission) + ')'
-    
+        return 'Fact(' + str(self.attribute) + ', ' + str(self.value) + ', ' + str(self.precision) + ')'
+
     def __hash__(self) -> int:
         return hash(self.__str__())
-    
+
     def __iter__(self):
         yield self
 
     def build(self, builder) -> QRoutine:
         return builder.build_fact(self)
-        
+
 
 class AndOperator(LeftHandSide):
     """Class representing an AndOperator.
@@ -93,23 +93,23 @@ class AndOperator(LeftHandSide):
 
     def __eq__(self, other) -> bool:
         return isinstance(other, self.__class__) and self.left_child == other.left_child and self.right_child == other.right_child
-    
+
     def __contains__(self, child) -> bool:
         return child == self.left_child or child == self.right_child or child in self.left_child or child in self.right_child
-    
+
     def __str__(self) -> str:
         return 'AndOperator(\n' + '\t' + str(self.left_child) + ',\n' + '\t' + str(self.right_child) + '\n' + ')'
-    
+
     def __hash__(self) -> int:
         return hash(self.__str__())
-    
+
     def __iter__(self):
         yield from self.left_child
         yield from self.right_child
 
     def build(self, builder) -> QRoutine:
         return builder.build_and()
-        
+
 
 class OrOperator(LeftHandSide):
     """Class representing an OrOperator.
@@ -128,16 +128,16 @@ class OrOperator(LeftHandSide):
 
     def __eq__(self, other) -> bool:
         return isinstance(other, self.__class__) and self.left_child == other.left_child and self.right_child == other.right_child
-    
+
     def __contains__(self, child) -> bool:
         return child == self.left_child or child == self.right_child or child in self.left_child or child in self.right_child
-    
+
     def __str__(self) -> str:
         return 'OrOperator(\n' + '\t' + str(self.left_child) + ',\n' + '\t' + str(self.right_child) + '\n' + ')'
-    
+
     def __hash__(self) -> int:
         return hash(self.__str__())
-    
+
     def __iter__(self):
         yield from self.left_child
         yield from self.right_child
@@ -145,7 +145,6 @@ class OrOperator(LeftHandSide):
     def build(self, builder) -> QRoutine:
         return builder.build_or()
 
-        
 
 class NotOperator(LeftHandSide):
     """Class representing a NotOperator.
@@ -162,13 +161,13 @@ class NotOperator(LeftHandSide):
 
     def __eq__(self, other) -> bool:
         return isinstance(other, self.__class__) and self.child == other.child
-    
+
     def __contains__(self, child) -> bool:
         return child == self.child or child in self.child
-    
+
     def __str__(self) -> str:
         return 'NotOperator(\n' + '\t' + str(self.child) + '\n)'
-    
+
     def __hash__(self) -> int:
         return hash(self.__str__())
 
@@ -177,7 +176,7 @@ class NotOperator(LeftHandSide):
 
     def build(self, builder) -> QRoutine:
         return builder.build_not()
-        
+
 
 class Rule(Buildable):
     """Class representing a Rule.
@@ -185,40 +184,41 @@ class Rule(Buildable):
     A Rule which establishes a relationship (to some level of uncertainty) between a left hand side element and a right hand side, which in this context is a Fact.
 
     Attributes:
-        leftHandSide (:obj:`LeftHandSide`): Left hand side element of the rule (also known as precedent).
-        rightHandSide (:obj:`Fact`): Right hand side element of the rule (also known as consecuent).
-        uncertainty (float, optional): Uncertainty of the relationship between precedent and consecuent (0 if not specified). Must be in range [0,1].
+        left_hand_side (:obj:`LeftHandSide`): Left hand side element of the rule (also known as precedent).
+        right_hand_side (:obj:`Fact`): Right hand side element of the rule (also known as consequent).
+        certainty (float, optional): Certainty of the relationship between precedent and consequent (0 if not specified). Must be in range [0,1].
     """
 
-    def __init__(self, lefthandside, righthandside, uncertainty=0.0) -> None:
+    def __init__(self, left_hand_side, right_hand_side, certainty=0.0) -> None:
         super().__init__()
-        self.lefthandside = lefthandside
-        self.righthandside = righthandside
-        self.uncertainty = uncertainty
-        
+        self.left_hand_side = left_hand_side
+        self.right_hand_side = right_hand_side
+        self.certainty = certainty
+
     @property
-    def uncertainty(self):
-        return self._uncertainty
-    
-    @uncertainty.setter
-    def uncertainty(self, uncertainty):
-        if 0.0 <= uncertainty <= 1.0:
-            self._uncertainty = uncertainty
+    def certainty(self):
+        return self._certainty
+
+    @certainty.setter
+    def certainty(self, certainty):
+        if 0.0 <= certainty <= 1.0:
+            self._certainty = certainty
         else:
-            raise ValueError('Uncertainty must be in range [0,1]')
+            raise ValueError('Certainty must be in range [0,1]')
 
     def __eq__(self, other) -> bool:
-        return isinstance(other, self.__class__) and self.lefthandside == other.lefthandside and self.righthandside == other.righthandside and self.uncertainty == other.uncertainty
+        return isinstance(other, self.__class__) and self.left_hand_side == other.left_hand_side and self.right_hand_side == other.right_hand_side and self.certainty == other.certainty
 
     def __lt__(self, other) -> bool:
-        return self.righthandside in other.lefthandside
-    
+        return self.right_hand_side in other.left_hand_side
+
     def __str__(self) -> str:
-        return 'Rule(\n' + '\t' + str(self.lefthandside) + ',\n' + '\t' + str(self.righthandside) + ',\n' + '\t' + str(self.uncertainty) + '\n' + ')'
+        return 'Rule(\n' + '\t' + str(self.left_hand_side) + ',\n' + '\t' + str(self.right_hand_side) + ',\n' + '\t' + str(
+            self.certainty) + '\n' + ')'
 
     def build(self, builder) -> QRoutine:
         return builder.build_rule(self)
-        
+
 
 class KnowledgeIsland(Buildable):
     """Class representing a Knowledge Island.
@@ -235,16 +235,16 @@ class KnowledgeIsland(Buildable):
 
     def __eq__(self, other) -> bool:
         return isinstance(other, self.__class__) and self.rules == other.rules
-    
+
     def __str__(self) -> str:
         return 'KnowledgeIsland(\n' + ''.join(f'\t{rule},\n' for rule in self.rules) + ')'
 
     def build(self, builder) -> QRoutine:
         routine, _ = builder.build_island(self)
         return routine
-    
 
-class Builder(ABC): # pragma: no cover
+
+class Builder(ABC):  # pragma: no cover
     """Interface for building the corresponding quantum routine from a Buildable element.
     """
 
@@ -323,12 +323,12 @@ class BuilderImpl(Builder):
     """
 
     def _matrix_gen(inaccuracy):
-        theta = inaccuracy * np.pi/2
+        theta = inaccuracy * np.pi / 2
         return np.array([
             [np.cos(theta), np.sin(theta)],
             [np.sin(theta), -np.cos(theta)]
         ])
-    
+
     M = AbstractGate("M", [float], arity=1, matrix_generator=_matrix_gen)
 
     @staticmethod
@@ -343,7 +343,7 @@ class BuilderImpl(Builder):
         """
 
         routine = QRoutine()
-        routine.apply(BuilderImpl.M(fact.imprecission), 0)
+        routine.apply(BuilderImpl.M(fact.precision), 0)
         return routine
 
     @staticmethod
@@ -394,7 +394,7 @@ class BuilderImpl(Builder):
         """
         routine, _ = BuilderImpl.build_island(KnowledgeIsland([rule]))
         return routine
-    
+
     @staticmethod
     def build_island(island) -> Tuple[QRoutine, Dict[LeftHandSide, int]]:
         """Builds the quantum routine of a knowledge island.
@@ -405,6 +405,7 @@ class BuilderImpl(Builder):
         Returns:
             Tuple[:obj:`QRoutine`, Dict[:obj:`LeftHandSide`, int]]: A tuple containing the corresponding quantum routine and the index of which qubit corresponds to each LeftHandSide element.
         """
+
         def build_precedent_routine(precedent, routine, elements):
             if isinstance(precedent, Fact):
                 return
@@ -414,7 +415,7 @@ class BuilderImpl(Builder):
                     if precedent.child not in elements:
                         build_precedent_routine(precedent.child, routine, elements)
                     qbits.extend([elements[precedent.child]])
-                else: # isinstance(precedent, AndOperator or OrOperator)
+                else:  # isinstance(precedent, AndOperator or OrOperator)
                     if precedent.left_child not in elements:
                         build_precedent_routine(precedent.left_child, routine, elements)
                     if precedent.right_child not in elements:
@@ -426,24 +427,24 @@ class BuilderImpl(Builder):
 
         def build_implication_routine(rule, routine, elements):
             routine.new_wires(1)
-            routine.apply(BuilderImpl.M(rule.uncertainty), routine.max_wire)
-            routine.apply(CCNOT, elements[rule.lefthandside], routine.max_wire, elements[rule.righthandside])
-        
+            routine.apply(BuilderImpl.M(rule.certainty), routine.max_wire)
+            routine.apply(CCNOT, elements[rule.left_hand_side], routine.max_wire, elements[rule.right_hand_side])
+
         rules = island.rules
         rules.sort()
         elements = {}
         routine = QRoutine()
         for rule in rules:
-            for fact in rule.lefthandside:
-                if fact not in [rule.righthandside for rule in rules] and fact not in elements.keys():
+            for fact in rule.left_hand_side:
+                if fact not in [rule.right_hand_side for rule in rules] and fact not in elements.keys():
                     routine.new_wires(1)
                     elements[fact] = routine.max_wire
                     routine.apply(fact.build(BuilderImpl), elements[fact])
         for rule in rules:
             routine.new_wires(1)
-            elements[rule.righthandside] = routine.max_wire
+            elements[rule.right_hand_side] = routine.max_wire
         for rule in rules:
-            build_precedent_routine(rule.lefthandside, routine, elements)
+            build_precedent_routine(rule.left_hand_side, routine, elements)
             build_implication_routine(rule, routine, elements)
         return routine, elements
 
@@ -464,7 +465,7 @@ class BuilderFuzzy(Builder):
         """
 
         routine = QRoutine()
-        routine.apply(RY(fact.imprecission * np.pi), 0)
+        routine.apply(RY(fact.precision * np.pi), 0)
         return routine
 
     @staticmethod
@@ -518,7 +519,7 @@ class BuilderFuzzy(Builder):
         """
         routine, _ = BuilderFuzzy.build_island(KnowledgeIsland([rule]))
         return routine
-    
+
     @staticmethod
     def build_island(island) -> Tuple[QRoutine, Dict[LeftHandSide, int]]:
         """Builds the quantum routine of a knowledge island.
@@ -529,6 +530,7 @@ class BuilderFuzzy(Builder):
         Returns:
             Tuple[:obj:`QRoutine`, Dict[:obj:`LeftHandSide`, int]]: A tuple containing the corresponding quantum routine and the index of which qubit corresponds to each LeftHandSide element.
         """
+
         def build_precedent_routine(precedent, routine, elements):
             if isinstance(precedent, Fact):
                 return
@@ -538,7 +540,7 @@ class BuilderFuzzy(Builder):
                     if precedent.child not in elements:
                         build_precedent_routine(precedent.child, routine, elements)
                     qbits.extend([elements[precedent.child]])
-                else: # isinstance(precedent, AndOperator or OrOperator)
+                else:  # isinstance(precedent, AndOperator or OrOperator)
                     if precedent.left_child not in elements:
                         build_precedent_routine(precedent.left_child, routine, elements)
                     if precedent.right_child not in elements:
@@ -550,24 +552,24 @@ class BuilderFuzzy(Builder):
 
         def build_implication_routine(rule, routine, elements):
             routine.new_wires(1)
-            routine.apply(RY(rule.uncertainty * np.pi), routine.max_wire)
-            routine.apply(CCNOT, elements[rule.lefthandside], routine.max_wire, elements[rule.righthandside])
-        
+            routine.apply(RY(rule.certainty * np.pi), routine.max_wire)
+            routine.apply(CCNOT, elements[rule.left_hand_side], routine.max_wire, elements[rule.right_hand_side])
+
         rules = island.rules
         rules.sort()
         elements = {}
         routine = QRoutine()
         for rule in rules:
-            for fact in rule.lefthandside:
-                if fact not in [rule.righthandside for rule in rules] and fact not in elements.keys():
+            for fact in rule.left_hand_side:
+                if fact not in [rule.right_hand_side for rule in rules] and fact not in elements.keys():
                     routine.new_wires(1)
                     elements[fact] = routine.max_wire
                     routine.apply(fact.build(BuilderFuzzy), elements[fact])
         for rule in rules:
             routine.new_wires(1)
-            elements[rule.righthandside] = routine.max_wire
+            elements[rule.right_hand_side] = routine.max_wire
         for rule in rules:
-            build_precedent_routine(rule.lefthandside, routine, elements)
+            build_precedent_routine(rule.left_hand_side, routine, elements)
             build_implication_routine(rule, routine, elements)
         return routine, elements
 
@@ -584,7 +586,7 @@ class BuilderBayes(Builder):
             [0, 0, np.cos(theta), -np.sin(theta)],
             [0, 0, np.sin(theta), np.cos(theta)]
         ])
-    
+
     CRY = AbstractGate("CRY", [float], arity=2, matrix_generator=_matrix_gen)
 
     @staticmethod
@@ -599,7 +601,7 @@ class BuilderBayes(Builder):
         """
 
         routine = QRoutine()
-        routine.apply(RY(fact.imprecission * np.pi), 0)
+        routine.apply(RY(fact.precision * np.pi), 0)
         return routine
 
     @staticmethod
@@ -654,7 +656,7 @@ class BuilderBayes(Builder):
         """
         routine, _ = BuilderBayes.build_island(KnowledgeIsland([rule]))
         return routine
-    
+
     @staticmethod
     def build_island(island) -> Tuple[QRoutine, Dict[LeftHandSide, int]]:
         """Builds the quantum routine of a knowledge island.
@@ -665,6 +667,7 @@ class BuilderBayes(Builder):
         Returns:
             Tuple[:obj:`QRoutine`, Dict[:obj:`LeftHandSide`, int]]: A tuple containing the corresponding quantum routine and the index of which qubit corresponds to each LeftHandSide element.
         """
+
         def build_precedent_routine(precedent, routine, elements):
             if isinstance(precedent, Fact):
                 return
@@ -674,7 +677,7 @@ class BuilderBayes(Builder):
                     if precedent.child not in elements:
                         build_precedent_routine(precedent.child, routine, elements)
                     qbits.extend([elements[precedent.child]])
-                else: # isinstance(precedent, AndOperator or OrOperator)
+                else:  # isinstance(precedent, AndOperator or OrOperator)
                     if precedent.left_child not in elements:
                         build_precedent_routine(precedent.left_child, routine, elements)
                     if precedent.right_child not in elements:
@@ -685,23 +688,22 @@ class BuilderBayes(Builder):
                 elements[precedent] = routine.max_wire
 
         def build_implication_routine(rule, routine, elements):
-            routine.apply(BuilderBayes.CRY(rule.uncertainty), elements[rule.lefthandside], elements[rule.righthandside])
-        
+            routine.apply(BuilderBayes.CRY(rule.certainty), elements[rule.left_hand_side], elements[rule.right_hand_side])
+
         rules = island.rules
         rules.sort()
         elements = {}
         routine = QRoutine()
         for rule in rules:
-            for fact in rule.lefthandside:
-                if fact not in [rule.righthandside for rule in rules] and fact not in elements.keys():
+            for fact in rule.left_hand_side:
+                if fact not in [rule.right_hand_side for rule in rules] and fact not in elements.keys():
                     routine.new_wires(1)
                     elements[fact] = routine.max_wire
                     routine.apply(fact.build(BuilderBayes), elements[fact])
         for rule in rules:
             routine.new_wires(1)
-            elements[rule.righthandside] = routine.max_wire
+            elements[rule.right_hand_side] = routine.max_wire
         for rule in rules:
-            build_precedent_routine(rule.lefthandside, routine, elements)
+            build_precedent_routine(rule.left_hand_side, routine, elements)
             build_implication_routine(rule, routine, elements)
         return routine, elements
-    

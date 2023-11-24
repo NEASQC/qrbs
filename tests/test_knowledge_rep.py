@@ -89,11 +89,11 @@ class TestRule:
         Test rule modification
         """
         rule = Rule(self.left_hand, self.right_hand)
-        rule.lefthandside = self.left_hand_modified
-        rule.righthandside = self.right_hand_modified
+        rule.left_hand_side = self.left_hand_modified
+        rule.right_hand_side = self.right_hand_modified
 
-        assert rule.lefthandside == self.left_hand_modified
-        assert rule.righthandside == self.right_hand_modified
+        assert rule.left_hand_side == self.left_hand_modified
+        assert rule.right_hand_side == self.right_hand_modified
 
 
 class TestKnowledgeIsland:
@@ -141,41 +141,41 @@ class TestKnowledgeIsland:
         assert island.rules == [self.rule_2]
 
 
-class TestUncerainty:
+class TestCertainty:
     """
-    Testing imprecission and uncertainty
+    Testing precision and uncertainty
     """
-    def test_imprecission(self):
+    def test_precision(self):
         """
-        Test imprecission
+        Test precision
         """
         fact = Fact('fact', 0.5, 0.5)
-        assert fact.imprecission == 0.5
+        assert fact.precision == 0.5
 
-        # Raises an error due to invalid imprecission values
+        # Raises an error due to invalid precision values
         with pytest.raises(ValueError) as ex_info:
-            fact.imprecission = -0.5
-        assert ex_info.match(r'Imprecission must be in range \[0,1\]')
+            fact.precision = -0.5
+        assert ex_info.match(r'Precision must be in range \[0,1\]')
         with pytest.raises(ValueError) as ex_info:
-            fact.imprecission = 1.5
-        assert ex_info.match(r'Imprecission must be in range \[0,1\]')
+            fact.precision = 1.5
+        assert ex_info.match(r'Precision must be in range \[0,1\]')
 
-    def test_uncertainty(self):
+    def test_certainty(self):
         """
-        Test uncertainty
+        Test certainty
         """
         fact_1 = Fact('fact_1', 0.5)
         fact_2 = Fact('fact_2', 0.5)
         rule = Rule(fact_1, fact_2, 0.5)
-        assert rule.uncertainty == 0.5
+        assert rule.certainty == 0.5
 
         # Raises an error due to invalid uncertainty values
         with pytest.raises(ValueError) as ex_info:
-            rule.uncertainty = -0.5
-        assert ex_info.match(r'Uncertainty must be in range \[0,1\]')
+            rule.certainty = -0.5
+        assert ex_info.match(r'Certainty must be in range \[0,1\]')
         with pytest.raises(ValueError) as ex_info:
-            rule.uncertainty = 1.5
-        assert ex_info.match(r'Uncertainty must be in range \[0,1\]')
+            rule.certainty = 1.5
+        assert ex_info.match(r'Certainty must be in range \[0,1\]')
 
 
 class TestBuilder:
@@ -210,7 +210,7 @@ class TestBuilder:
         built_routine = self.in_1.build(BuilderImpl)
 
         test_routine = QRoutine()
-        test_routine.apply(BuilderImpl.M(self.in_1.imprecission), 0)
+        test_routine.apply(BuilderImpl.M(self.in_1.precision), 0)
         
         [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
 
@@ -269,14 +269,14 @@ class TestBuilder:
         built_routine = self.rule_1.build(BuilderImpl)
 
         test_routine = QRoutine()
-        test_routine.apply(BuilderImpl.M(self.in_1.imprecission), 0)
-        test_routine.apply(BuilderImpl.M(self.in_2.imprecission), 1)
+        test_routine.apply(BuilderImpl.M(self.in_1.precision), 0)
+        test_routine.apply(BuilderImpl.M(self.in_2.precision), 1)
         test_routine.apply(CNOT, 1, 3)
         test_routine.apply(X, 3)
         test_routine.apply(CCNOT, 0, 3, 4)
         test_routine.apply(CNOT, 0, 4)
         test_routine.apply(CNOT, 3, 4)
-        test_routine.apply(BuilderImpl.M(self.rule_1.uncertainty), 5)
+        test_routine.apply(BuilderImpl.M(self.rule_1.certainty), 5)
         test_routine.apply(CCNOT, 4, 5, 2)
         
         [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
@@ -291,18 +291,18 @@ class TestBuilder:
         built_routine = self.island.build(BuilderImpl)
 
         test_routine = QRoutine()
-        test_routine.apply(BuilderImpl.M(self.in_1.imprecission), 0)
-        test_routine.apply(BuilderImpl.M(self.in_2.imprecission), 1)
-        test_routine.apply(BuilderImpl.M(self.in_3.imprecission), 2)
+        test_routine.apply(BuilderImpl.M(self.in_1.precision), 0)
+        test_routine.apply(BuilderImpl.M(self.in_2.precision), 1)
+        test_routine.apply(BuilderImpl.M(self.in_3.precision), 2)
         test_routine.apply(CNOT, 1, 5)
         test_routine.apply(X, 5)
         test_routine.apply(CCNOT, 0, 5, 6)
         test_routine.apply(CNOT, 0, 6)
         test_routine.apply(CNOT, 5, 6)
-        test_routine.apply(BuilderImpl.M(self.rule_1.uncertainty), 7)
+        test_routine.apply(BuilderImpl.M(self.rule_1.certainty), 7)
         test_routine.apply(CCNOT, 6, 7, 3)
         test_routine.apply(CCNOT, 3, 2, 8)
-        test_routine.apply(BuilderImpl.M(self.rule_2.uncertainty), 9)
+        test_routine.apply(BuilderImpl.M(self.rule_2.certainty), 9)
         test_routine.apply(CCNOT, 8, 9, 4)
         
         [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
@@ -343,7 +343,7 @@ class TestBuilderFuzzy:
         built_routine = self.in_1.build(BuilderFuzzy)
 
         test_routine = QRoutine()
-        test_routine.apply(RY(self.in_1.imprecission), 0)
+        test_routine.apply(RY(self.in_1.precision), 0)
         
         [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
 
@@ -405,8 +405,8 @@ class TestBuilderFuzzy:
         built_routine = self.rule_1.build(BuilderFuzzy)
 
         test_routine = QRoutine()
-        test_routine.apply(RY(self.in_1.imprecission * np.pi), 0)
-        test_routine.apply(RY(self.in_2.imprecission * np.pi), 1)
+        test_routine.apply(RY(self.in_1.precision * np.pi), 0)
+        test_routine.apply(RY(self.in_2.precision * np.pi), 1)
         test_routine.apply(CNOT, 1, 3)
         test_routine.apply(X, 3)
         test_routine.apply(X, 0)
@@ -415,7 +415,7 @@ class TestBuilderFuzzy:
         test_routine.apply(X, 0)
         test_routine.apply(X, 3)
         test_routine.apply(X, 4)
-        test_routine.apply(RY(self.rule_1.uncertainty * np.pi), 5)
+        test_routine.apply(RY(self.rule_1.certainty * np.pi), 5)
         test_routine.apply(CCNOT, 4, 5, 2)
         
         [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
@@ -430,9 +430,9 @@ class TestBuilderFuzzy:
         built_routine = self.island.build(BuilderFuzzy)
 
         test_routine = QRoutine()
-        test_routine.apply(RY(self.in_1.imprecission * np.pi), 0)
-        test_routine.apply(RY(self.in_2.imprecission * np.pi), 1)
-        test_routine.apply(RY(self.in_3.imprecission * np.pi), 2)
+        test_routine.apply(RY(self.in_1.precision * np.pi), 0)
+        test_routine.apply(RY(self.in_2.precision * np.pi), 1)
+        test_routine.apply(RY(self.in_3.precision * np.pi), 2)
         test_routine.apply(CNOT, 1, 5)
         test_routine.apply(X, 5)
         test_routine.apply(X, 0)
@@ -441,10 +441,10 @@ class TestBuilderFuzzy:
         test_routine.apply(X, 0)
         test_routine.apply(X, 5)
         test_routine.apply(X, 6)
-        test_routine.apply(RY(self.rule_1.uncertainty * np.pi), 7)
+        test_routine.apply(RY(self.rule_1.certainty * np.pi), 7)
         test_routine.apply(CCNOT, 6, 7, 3)
         test_routine.apply(CCNOT, 3, 2, 8)
-        test_routine.apply(RY(self.rule_2.uncertainty * np.pi), 9)
+        test_routine.apply(RY(self.rule_2.certainty * np.pi), 9)
         test_routine.apply(CCNOT, 8, 9, 4)
         
         [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
@@ -485,7 +485,7 @@ class TestBuilderBayes:
         built_routine = self.in_1.build(BuilderBayes)
 
         test_routine = QRoutine()
-        test_routine.apply(RY(self.in_1.imprecission), 0)
+        test_routine.apply(RY(self.in_1.precision), 0)
         
         [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
 
@@ -548,8 +548,8 @@ class TestBuilderBayes:
         built_routine = self.rule_1.build(BuilderBayes)
 
         test_routine = QRoutine()
-        test_routine.apply(RY(self.in_1.imprecission * np.pi), 0)
-        test_routine.apply(RY(self.in_2.imprecission * np.pi), 1)
+        test_routine.apply(RY(self.in_1.precision * np.pi), 0)
+        test_routine.apply(RY(self.in_2.precision * np.pi), 1)
         test_routine.apply(CNOT, 1, 3)
         test_routine.apply(X, 3)
         test_routine.apply(X, 0)
@@ -559,7 +559,7 @@ class TestBuilderBayes:
         test_routine.apply(CCNOT, 0, 3, 4)
         test_routine.apply(X, 3)
         test_routine.apply(CCNOT, 0, 3, 4)
-        test_routine.apply(BuilderBayes.CRY(self.rule_1.uncertainty), 4, 2)
+        test_routine.apply(BuilderBayes.CRY(self.rule_1.certainty), 4, 2)
         
         [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
 
@@ -573,9 +573,9 @@ class TestBuilderBayes:
         built_routine = self.island.build(BuilderBayes)
 
         test_routine = QRoutine()
-        test_routine.apply(RY(self.in_1.imprecission * np.pi), 0)
-        test_routine.apply(RY(self.in_2.imprecission * np.pi), 1)
-        test_routine.apply(RY(self.in_3.imprecission * np.pi), 2)
+        test_routine.apply(RY(self.in_1.precision * np.pi), 0)
+        test_routine.apply(RY(self.in_2.precision * np.pi), 1)
+        test_routine.apply(RY(self.in_3.precision * np.pi), 2)
         test_routine.apply(CNOT, 1, 5)
         test_routine.apply(X, 5)
         test_routine.apply(X, 0)
@@ -585,9 +585,9 @@ class TestBuilderBayes:
         test_routine.apply(CCNOT, 0, 5, 6)
         test_routine.apply(X, 5)
         test_routine.apply(CCNOT, 0, 5, 6)
-        test_routine.apply(BuilderBayes.CRY(self.rule_1.uncertainty), 6, 3)
+        test_routine.apply(BuilderBayes.CRY(self.rule_1.certainty), 6, 3)
         test_routine.apply(CCNOT, 3, 2, 7)
-        test_routine.apply(BuilderBayes.CRY(self.rule_1.uncertainty), 7, 4)
+        test_routine.apply(BuilderBayes.CRY(self.rule_1.certainty), 7, 4)
         
         [built_circ, test_circ] = [self._build_circ(routine).to_circ() for routine in [built_routine, test_routine]]
 

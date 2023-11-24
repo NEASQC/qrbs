@@ -7,7 +7,7 @@ from qat.lang.AQASM import Program
 from qat.pylinalg import PyLinalg
 
 
-class WorkingMemory():
+class WorkingMemory:
     """Class representing a Working Memory. 
     
     A Working Memory is an element of a Rule-Based System that manages its facts, keeping trace of their state.
@@ -16,8 +16,10 @@ class WorkingMemory():
         _facts (List[:obj:`Fact`], optional): List of facts asserted into the system.
     """
 
-    def __init__(self, facts=[]) -> None:
+    def __init__(self, facts=None) -> None:
         super().__init__()
+        if facts is None:
+            facts = []
         self._facts = []
         for fact in facts:
             self.assert_fact(fact)
@@ -46,7 +48,7 @@ class WorkingMemory():
         self._facts.remove(fact)
 
 
-class InferenceEngine():
+class InferenceEngine:
     """Class representing an Inference Engine. 
     
     An Inference Engine is an element of a Rule-Based System that manages its rules and knowledge islands, providing the tools to evaluate them in order.
@@ -56,8 +58,12 @@ class InferenceEngine():
         _islands (List[:obj:`KnowledgeIsland`], optional): List of knowledge island established for the system.
     """
 
-    def __init__(self, rules=[], islands=[]) -> None:
+    def __init__(self, rules=None, islands=None) -> None:
         super().__init__()
+        if rules is None:
+            rules = []
+        if islands is None:
+            islands = []
         self._rules = []
         for rule in rules:
             self.assert_rule(rule)
@@ -111,7 +117,7 @@ class InferenceEngine():
             found_link = None
             for link in chain:
                 for rule in rules:
-                    if (link.righthandside in rule.lefthandside) or (rule.righthandside in link.lefthandside) and (rule not in chain):
+                    if (link.right_hand_side in rule.left_hand_side) or (rule.right_hand_side in link.left_hand_side) and (rule not in chain):
                         found_link = rule
                         chain.append(found_link)
                         break
@@ -178,7 +184,7 @@ class QRBS():
             fact (:obj:`Fact`): The fact to be retracted.
         """
         for rule in self._engine._rules:
-            if fact in rule.lefthandside or fact in rule.righthandside:
+            if fact in rule.left_hand_side or fact in rule.right_hand_side:
                 raise AttributeError('The fact to be retracted is part of a rule and cannot be retracted')
         self._memory.retract_fact(fact)
 
@@ -262,47 +268,53 @@ class MyQlmQPU(QPU):
     }
         
     @staticmethod
-    def evaluate(qrbs, islands=[], model='cf') -> bool:
+    def evaluate(qrbs, eval_islands=None, model='cf') -> bool:
         """Evaluates whether a QRBS can be executed on this QPU.
 
         Args:
             qrbs (:obj:`QRBS`): The QRBS to be evaluated.
             eval_islands (List[:obj:`KnowledgeIsland`], optional): A list of specific KnowledgeIsland to be evaluated.
+            model (str, optional): The code of the model indicated.
 
         Raises:
-            ValueError: In case an specified knowledge island is not part of the QRBS or an evaluated knowledge island requires more qubits than supported.
+            ValueError: In case a specified knowledge island is not part of the QRBS or an evaluated knowledge island requires more qubits than supported.
         """
+        if eval_islands is None:
+            eval_islands = []
         evaluation = True
         # Initiate islands in case of specified evaluation
-        if islands == []:
-            islands = qrbs._engine._islands
+        if not eval_islands:
+            eval_islands = qrbs._engine._islands
         else:
-            for island in islands:
+            for island in eval_islands:
                 if island not in qrbs._engine._islands:
                     raise ValueError('A specified KnowledgeIsland is not part of the QRBS', island)
         # Build each island
         builder = MyQlmQPU.BUILDERS[model]
-        islands = [builder.build_island(island) for island in islands]
+        eval_islands = [builder.build_island(island) for island in eval_islands]
         # Check their arity is compatible with the QPU
-        for island in islands:
+        for island in eval_islands:
             routine, _ = island
             if routine.arity > MyQlmQPU.MAX_ARITY:
                 evaluation = False
-                raise ValueError('A KnowledgeIsland surpases capacity of QPU ({} qubits)'.format(MyQlmQPU.MAX_ARITY), qrbs._engine._islands[islands.index(island)])
+                raise ValueError('A KnowledgeIsland surpasses capacity of QPU ({} qubits)'.format(MyQlmQPU.MAX_ARITY), qrbs._engine._islands[eval_islands.index(island)])
         return evaluation
 
     @staticmethod
-    def execute(qrbs, islands=[], model='cf') -> None:
+    def execute(qrbs, islands=None, model='cf') -> None:
         """Executes the QRBS on this QPU.
 
         Args:
             qrbs (:obj:`QRBS`): The QRBS to be executed.
             islands (List[:obj:`KnowledgeIsland`], optional): A list of specific KnowledgeIsland to be executed.
+            model (str, optional): The code of the model indicated.
         """
         # Select builder
+        if islands is None:
+            islands = []
         builder = MyQlmQPU.BUILDERS[model]
         # Initiate islands in case of specified evaluation
-        if islands == []:
+        if not islands:
             islands = qrbs._engine._islands
         # If evaluation is successful, continue with execution
         if MyQlmQPU.evaluate(qrbs, islands, model):
@@ -319,10 +331,10 @@ class MyQlmQPU(QPU):
                 result = linalgqpu.submit(job)
 
                 for element, index in elements.items():
-                    if element in [rule.righthandside for rule in qrbs._engine._rules]:
+                    if element in [rule.right_hand_side for rule in qrbs._engine._rules]:
                         temp = 0
                         for sample in result:
                             if sample.state.bitstring[index] == '1':
                                 temp += sample.probability
-                        element.imprecission = temp
+                        element.precision = temp
                 
