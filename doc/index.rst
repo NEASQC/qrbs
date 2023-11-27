@@ -43,7 +43,8 @@
     :caption: Usage
     :hidden:
 
-    usage
+    basic_usage
+    advanced_usage
 
 .. toctree::
     :maxdepth: 2

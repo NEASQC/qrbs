@@ -13,7 +13,7 @@ Once that has been taken care of, you can proceed with the installation! The fir
 Once you have cloned the project, go to its directory and make sure your Python virtual environment is activated. Here we present two methods to install the package, choose the one that suits you best:
 
 Method 1: use setup.py
-======================
+----------------------
 
 Inside the directory, run the following command:
 
@@ -25,7 +25,7 @@ Follow the installation script, and you are done!
 
 
 Method 2: build the package
-===========================
+---------------------------
 
 By using this method, you will build the package from the source code and then install it. You may require to install some packages like `build <https://packaging.python.org/en/latest/tutorials/packaging-projects/#generating-distribution-archives>`_ if you do not have them already.
 
@@ -35,7 +35,7 @@ To build the package, run the following command:
 
     python -m build
 
-After the building process has finished, you will find a dist directory with different files. Go inside this directory and run the following command:
+After the building process has finished, you will find the ``dist`` directory with different files. Go inside this directory and run the following command:
 
 .. code::
 
