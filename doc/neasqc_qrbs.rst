@@ -1,29 +1,23 @@
-neasqc\_qrbs package
+Package neasqc\_qrbs 
 ====================
 
-Submodules
-----------
+In this section you can find the technical documentation of both modules of this package, along with their software specification. These modules are:
 
-neasqc\_qrbs.knowledge\_rep module
-----------------------------------
+* :doc:`knowledge_rep`: this package is conformed by the classes that allow us to encode knowledge into the system.
 
-.. automodule:: neasqc_qrbs.knowledge_rep
-   :members:
-   :undoc-members:
-   :show-inheritance:
+* :doc:`qrbs`:  this package is conformed by the classes that manage the encoded knowledge and extract utility from it. 
 
-neasqc\_qrbs.qrbs module
-------------------------
 
-.. automodule:: neasqc_qrbs.qrbs
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+    :maxdepth: 1
+    :caption: Knowledge representation
+    :hidden:
 
-Module contents
----------------
+    knowledge_rep
 
-.. automodule:: neasqc_qrbs
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+    :maxdepth: 1
+    :caption: QRBS
+    :hidden:
+
+    qrbs
