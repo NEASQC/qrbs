@@ -17,11 +17,11 @@
 
 ----
 
-    This is the documentation page for the Quantum Rule-Based System (QRBS) software library of NEASQC project (WP6).
+    This is the documentation page for the Quantum Rule-Based System (QRBS) software library of `NEASQC project <https://neasqc.eu>`_ (WP6).
 
     If this is your first time around here, you might want to check out the :doc:`installation guide<install>`.
 
-    We also have some examples of :doc:`usage<usage>` of the library, as well as the :doc:`documentation<neasqc_qrbs>` of all the elements in each module.
+    We also have some examples of :doc:`basic<basic_usage>` and :doc:`advanced<advanced_usage>` usage of the library, as well as the :doc:`documentation<neasqc_qrbs>` of all the elements in each module.
 
 ----
 
