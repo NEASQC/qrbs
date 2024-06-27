@@ -688,7 +688,8 @@ class BuilderBayes(Builder):
                 elements[precedent] = routine.max_wire
 
         def build_implication_routine(rule, routine, elements):
-            routine.apply(BuilderBayes.CRY(rule.certainty), elements[rule.left_hand_side], elements[rule.right_hand_side])
+            #routine.apply(BuilderBayes.CRY(rule.certainty), elements[rule.left_hand_side], elements[rule.right_hand_side])
+            routine.apply(RY(np.pi * rule.certainty).ctrl(1), elements[rule.left_hand_side], elements[rule.right_hand_side])
 
         rules = island.rules
         rules.sort()

@@ -4,7 +4,10 @@ from abc import ABC, abstractmethod
 
 from .knowledge_rep import BuilderBayes, BuilderFuzzy, BuilderImpl, Fact, Rule, KnowledgeIsland
 from qat.lang.AQASM import Program
-from qat.pylinalg import PyLinalg
+try:
+    from qat.pylinalg import PyLinalg
+except ModuleNotFoundError:
+    print("Module Not Found")
 
 
 class WorkingMemory:
