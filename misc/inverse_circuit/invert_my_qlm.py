@@ -40,7 +40,7 @@ def init_state(alpha):
     """
     Initialize qubit state
     """
-    tree = KPTree(np.array([np.sqrt(alpha), np.sqrt(1.0 - alpha)])).get_routine()
+    tree = KPTree(np.array([np.sqrt(1.0 - alpha), np.sqrt(alpha)])).get_routine()
     return tree
 
 def rule(certainty, alpha=0.8, precision=True):
@@ -56,18 +56,21 @@ def rule(certainty, alpha=0.8, precision=True):
         routine.apply(init_state(alpha), register[0])
     routine.apply(M(certainty), register[1])
     routine.apply(qlm.CCNOT, register[0], register[1], register[2])
-    job = routine.to_circ().to_job(nbshots=0, qubits=[1])
+    job = routine.to_circ().to_job(nbshots=0, qubits=[2])
     linalg_qpu = CLinalg()
     result = linalg_qpu.submit(job)
     return proccess_qresults(result), routine
 
-def not_gate(alpha=0.8):
+def not_gate(alpha=0.8, precision=True):
     """
     Not Gate
     """
     routine = qlm.QRoutine()
     register = routine.new_wires(2)
-    routine.apply(init_state(alpha), register[0])
+    if precision == True:
+        routine.apply(M(alpha), register[0])
+    else:
+        routine.apply(init_state(alpha), register[0])
     routine.apply(qlm.CNOT, register[0], register[1])
     routine.apply(qlm.X, register[1])
     job = routine.to_circ().to_job(nbshots=0, qubits=[1])
@@ -123,61 +126,201 @@ def loss_rule(x, ouput_precision=0.8, precision=True):
     """
     certainty = x[0]
     alpha = x[1]
-    pdf, _ = rule(certainty, alpha, precision=True)
+    pdf, _ = rule(certainty, alpha, precision=precision)
     loss = (pdf["Probability"].iloc[1] - ouput_precision) ** 2
-    print(loss)
     return loss
 
-def loss_not(x, ouput_precision):
+def minimize_loss_rule(output_precision, precision=True):
+    """
+    Minimize loss function for rule
+    """
+    # Parameter to adjuts: Certainty of the rule
+    rule_certainty = random()
+    # Parameter to adjuts: Precision of precedent fact:
+    precedent_precision = output_precision / rule_certainty
+    # To avoid problems in minization some relationship
+    # should be established
+    while precedent_precision >= 1.0:
+        rule_certainty = random()
+        precedent_precision = output_precision / rule_certainty
+    # print("rule_certainty: {}".format(rule_certainty))
+    # print("pre:{}".format(precedent_precision))
+
+    # Inital guess for optimization
+    guest_rule = np.array([rule_certainty, precedent_precision])
+    # Minimization
+    res = minimize(
+        loss_rule,
+        guest_rule,
+        args = (output_precision, precision),
+        bounds = ((0.0, 1.0), (0.0, 1.0))
+    )
+    rule_certainty = res.x[0]
+    precedent_precision = res.x[1]
+    return rule_certainty, precedent_precision
+
+def loss_not(x, ouput_precision, precision=True):
+    """
+    loss for NOT gate
+    """
     alpha = x[0]
-    pdf, _ = not_gate(alpha)
-    print(pdf)
+    pdf, _ = not_gate(alpha, precision=precision)
     loss = (pdf["Probability"].iloc[1] - ouput_precision) ** 2
-    print(loss)
     return loss
+
+def minimize_loss_not(output_precision, precision=True):
+    """
+    minimize loss for NOT gate
+    """
+    # Parameter to adjuts: Precision of precedent fact:
+    precedent_precision = 1.0 - output_precision
+    # Inital guess for optimization
+    guest_rule = np.array([precedent_precision])
+    res = minimize(
+        loss_not,
+        guest_rule,
+        args = (output_precision, precision),
+        bounds = ((0.0, 1.0),)
+    )
+    precedent_precision = res.x[0]
+    return precedent_precision
+
 
 def loss_and(x, ouput_precision, precision_alpha=True, precision_beta=True):
-    pdf, _ = and_gate(alpha=x[0], beta=x[1], precision_alpha=True, precision_beta=True)
+    pdf, _ = and_gate(
+        alpha=x[0],
+        beta=x[1],
+        precision_alpha=precision_alpha,
+        precision_beta=precision_beta)
     loss = (pdf["Probability"].iloc[1] - ouput_precision) ** 2
-    print(loss)
+    # print(loss)
     return loss
+
+def minimize_loss_and(output_precision, precision_alpha=True, precision_beta=True):
+    """
+    Minimize loss function for AND
+    """
+    # Parameter to adjust: Precision of precedent facts:
+    precision_a_fact = random()
+    precision_b_fact = random()
+    
+    condition = min(precision_a_fact, precision_b_fact)
+    while (condition < 0.8 * output_precision) or (condition > 1.2 * output_precision):
+        precision_a_fact = random()
+        precision_b_fact = random()
+        condition = min(precision_a_fact, precision_b_fact)
+        # print(
+        #     precision_a_fact, precision_b_fact, condition,
+        #     0.9 * output_precision, 1.1 * output_precision)
+
+
+    # Inital guess for optimization
+    guest_rule = np.array([precision_a_fact, precision_b_fact])
+    # Minimization
+    res = minimize(
+        loss_and,
+        guest_rule,
+        args = (
+            output_precision, 
+            precision_alpha,
+            precision_beta
+        ),
+        bounds = ((0.0, 1.0), (0.0, 1.0))
+    )
+    precision_a_fact = res.x[0]
+    precision_b_fact = res.x[1]
+    return precision_a_fact, precision_b_fact
 
 def loss_or(x, ouput_precision, precision_alpha=True, precision_beta=True):
-    pdf, _ = or_gate(alpha=x[0], beta=x[1], precision_alpha=True, precision_beta=True)
+    pdf, _ = or_gate(
+        alpha=x[0],
+        beta=x[1],
+        precision_alpha=precision_alpha,
+        precision_beta=precision_beta
+    )
     loss = (pdf["Probability"].iloc[1] - ouput_precision) ** 2
-    print(loss)
+    # print(loss)
     return loss
 
-from scipy.optimize import minimize
-
-p_o = 0.8
-p_r = 0.8
-p_c = 0.6
-
-x0 = np.array([p_r, p_c])
-
-res = minimize(
-    loss_rule,
-    x0,
-    args = (p_o, False),
-    bounds = ((0.0, 1.0), (0.0, 1.0))
-)
-
-
-
-rule_c = res.x[0]
-precedent_p = res.x[1]
-print("Rule c before: {} and after {}".format(p_r, rule_c))
-print("Precendent of rule before: {} and after {}".format(p_c, precedent_p))
+def minimize_loss_or(output_precision, precision_alpha=True, precision_beta=True):
+    """
+    Minimize loss function for AND
+    """
+    # Parameter to adjust: Precision of precedent facts:
+    precision_a_fact = random()
+    precision_b_fact = random()
+    condition = min(precision_a_fact, precision_b_fact)
+    while (condition < 0.8 * output_precision) or (condition > 1.2 * output_precision):
+        precision_a_fact = random()
+        precision_b_fact = random()
+        condition = max(precision_a_fact, precision_b_fact)
+        # print(
+        #     precision_a_fact, precision_b_fact, condition,
+        #     0.9 * output_precision, 1.1 * output_precision)
 
 
+    # Inital guess for optimization
+    guest_rule = np.array([precision_a_fact, precision_b_fact])
+    # Minimization
+    res = minimize(
+        loss_or,
+        guest_rule,
+        args = (output_precision, precision_alpha, precision_beta),
+        bounds = ((0.0, 1.0), (0.0, 1.0))
+    )
+    precision_a_fact = res.x[0]
+    precision_b_fact = res.x[1]
+    return precision_a_fact, precision_b_fact
 
-res = minimize(
-    loss_and,
-    np.array([0.6, 0.9]),
-    args = (precedent_p, True, True),
-    bounds = ((0.0, 1.0), (0.0, 1.0))
-)
+if __name__ == "__main__":
+    from scipy.optimize import minimize
+    from random import random
 
-print(res)
+    # Precision del Hecho de Salida: P|1>
+    output_precision = 0.4
+
+
+    rule_certainty, precedent_precision = minimize_loss_rule(
+        output_precision, precision=False
+    )
+
+    print("output_precision: "+str(output_precision))
+    print("rule_certainty: "+str(rule_certainty))
+    print("precedent_precision: "+str(precedent_precision))
+
+    precedent_precision = minimize_loss_not(
+        precedent_precision, precision=True
+    )
+    print("precedent_precision Not: "+str(precedent_precision))
+
+    prec_a, prec_b = minimize_loss_and(precedent_precision, False, True)
+    print("AND: prec_a: "+str(prec_a))
+    print("AND: prec_b: "+str(prec_b))
+
+    prec_a, prec_b = minimize_loss_or(precedent_precision, True, True)
+    print("OR: prec_a: "+str(prec_a))
+    print("OR: prec_b: "+str(prec_b))
+
+
+    # pdf, c = rule(rule_c, alpha=precedent_p, precision=False)
+    # display(c)
+    # print(pdf)
+
+    #res = minimize(
+    #    loss_not,
+    #    np.array([0.2]),
+    #    args = (precedent_p, True),
+    #    bounds = ((0.0, 1.0), )
+    #)
+
+
+
+    # res = minimize(
+    #     loss_or,
+    #     np.array([0.8, 0.8]),
+    #     args = (precedent_p, True, True),
+    #     bounds = ((0.0, 1.0), (0.0, 1.0))
+    # )
+
+    #print(res)
 
