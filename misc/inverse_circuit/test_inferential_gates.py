@@ -25,7 +25,7 @@ def test_AND(output_precision = 0.6):
     routine.apply(precision_gate(state_a.alpha_a), register[0])
     routine.apply(precision_gate(state_b.alpha_a), register[1])
     routine.apply(and_gate(), register)
-    display(routine, max_depth=None)
+    display(routine)
     job = routine.to_circ().to_job(
         nbshots=0,
         qubits=[2]
@@ -35,9 +35,9 @@ def test_AND(output_precision = 0.6):
     pdf = solve_qjob(job, qpu)
     measured_precision = float(pdf[pdf["Int"] == 1]["Probability"])
 
-    # print("Desired Precision: {}. Gotten precision: {}".format(
-    #     output_precision, measured_precision)
-    # )
+    print("Desired Precision: {}. Gotten precision: {}".format(
+        output_precision, measured_precision)
+    )
     absolute_error = abs(output_precision - measured_precision)
     return output_precision, measured_precision, absolute_error
 
@@ -63,7 +63,7 @@ def test_OR(output_precision = 0.6):
     routine.apply(precision_gate(state_a.alpha_a), register[0])
     routine.apply(precision_gate(state_b.alpha_a), register[1])
     routine.apply(or_gate(), register)
-    #display(routine, max_depth=None)
+    display(routine, max_depth=None)
     job = routine.to_circ().to_job(
         nbshots=0,
         qubits=[2]
@@ -73,9 +73,9 @@ def test_OR(output_precision = 0.6):
     pdf = solve_qjob(job, qpu)
     measured_precision = float(pdf[pdf["Int"] == 1]["Probability"])
 
-    # print("Desired Precision: {}. Gotten precision: {}".format(
-    #     output_precision, measured_precision)
-    # )
+    print("Desired Precision: {}. Gotten precision: {}".format(
+        output_precision, measured_precision)
+    )
     absolute_error = abs(output_precision - measured_precision)
     return output_precision, measured_precision, absolute_error
 
@@ -96,7 +96,7 @@ def test_NOT(output_precision = 0.6):
     register = routine.new_wires(2)
     routine.apply(precision_gate(state_a.alpha_a), register[0])
     routine.apply(not_gate(), register)
-    #display(routine, max_depth=None)
+    display(routine, max_depth=None)
     job = routine.to_circ().to_job(
         nbshots=0,
         qubits=[1]
@@ -106,9 +106,9 @@ def test_NOT(output_precision = 0.6):
     pdf = solve_qjob(job, qpu)
     measured_precision = float(pdf[pdf["Int"] == 1]["Probability"])
 
-    #print("Desired Precision: {}. Gotten precision: {}".format(
-    #    output_precision, measured_precision)
-    #)
+    print("Desired Precision: {}. Gotten precision: {}".format(
+        output_precision, measured_precision)
+    )
     absolute_error = abs(output_precision - measured_precision)
     return output_precision, measured_precision, absolute_error
 
@@ -131,7 +131,7 @@ def test_RULE(output_precision = 0.6):
     register = routine.new_wires(3)
     routine.apply(precision_gate(state_a.alpha_a), register[0])
     routine.apply(rule_gate(alpha_b), register)
-    #display(routine, max_depth=None)
+    display(routine, max_depth=None)
     job = routine.to_circ().to_job(
         nbshots=0,
         qubits=[2]
@@ -141,9 +141,9 @@ def test_RULE(output_precision = 0.6):
     pdf = solve_qjob(job, qpu)
     measured_precision = float(pdf[pdf["Int"] == 1]["Probability"])
 
-    #print("Desired Precision: {}. Gotten precision: {}".format(
-    #    output_precision, measured_precision)
-    #)
+    print("Desired Precision: {}. Gotten precision: {}".format(
+        output_precision, measured_precision)
+    )
     absolute_error = abs(output_precision - measured_precision)
     return output_precision, measured_precision, absolute_error
 
@@ -187,9 +187,6 @@ def test_circuit(output_precision = 0.6):
     state_or_b = PRECISION(qpu, object_or.alpha_b)
     state_or_b.fit()
     lista_final.append(["Precision", state_or_b.alpha_a, None, None])
-
-    print(lista_final)
-
 
     # routine = qlm.QRoutine()
     # register = routine.new_wires(8)
@@ -287,10 +284,10 @@ def create_circuit(step, routine):
 if __name__ == "__main__":
     from qat.core.console import display
 
-    #test_AND(0.8)
-    #test_OR(0.8)
-    # test_NOT(0.8)
-    # test_RULE(0.8)
+    test_AND(0.8)
+    test_OR(0.8)
+    test_NOT(0.8)
+    test_RULE(0.8)
     test_circuit(0.8)
 
     # routine = qlm.QRoutine()

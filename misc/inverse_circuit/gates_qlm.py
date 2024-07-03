@@ -1,97 +1,86 @@
 """
-Inferential gates in qlm
+QLM quantum implementation of inferential Gates.
+Based on the paper:
+
+    Moret-Bonillo, Vicente and Magaz-Romero, Samuel and Mosqueira-Rey, Eduardo
+    Quantum Computing for Dealing with Inaccurate Knowledge Related
+    to the Certainty Factors Model
+    Mathematics, volumen 10, 2022
+
 """
 import numpy as np
-import pandas as pd
 import qat.lang.AQASM as qlm
 from qat.lang.models import KPTree
 
-def solve_qjob(job, qpu):
-    """
-    get quantum results
-    """
-    result = qpu.submit(job)
-    return proccess_qresults(result, 1, complete=True)
 
-def proccess_qresults(result, qubits, complete=False):
-    """
-    Post Process a QLM results for creating a pandas DataFrame
+def init_state(alpha):
+    r"""
+    Qubit state initialization.
+
+    Notes
+    -----
+    .. math::
+        |\Psi\rangle = \sqrt{1-\alpha} |0\rangle + \sqrt{\alpha} |1\rangle
 
     Parameters
     ----------
+    alpha : float
+       Probability of getting |1>
 
-    result : QLM results from a QLM qpu.
-        returned object from a qpu submit
-    qubits : int
-        number of qubits
-    complete : bool
-        for return the complete basis state.
+    Return
+    ------
+    gate : QLM gate
+        QLM gate that encodes a quantum state such that the probability
+        of getting the state |1> is alpha.
     """
-
-    # Process the results
-    if complete:
-        states = []
-        list_int = []
-        list_int_lsb = []
-        for i in range(2**qubits):
-            reversed_i = int("{:0{width}b}".format(i, width=qubits)[::-1], 2)
-            list_int.append(reversed_i)
-            list_int_lsb.append(i)
-            states.append("|" + bin(i)[2:].zfill(qubits) + ">")
-
-        probability = np.zeros(2**qubits)
-        amplitude = np.zeros(2**qubits, dtype=np.complex_)
-        for samples in result:
-            probability[samples.state.lsb_int] = samples.probability
-            amplitude[samples.state.lsb_int] = samples.amplitude
-
-        pdf = pd.DataFrame(
-            {
-                "States": states,
-                "Int_lsb": list_int_lsb,
-                "Probability": probability,
-                "Amplitude": amplitude,
-                "Int": list_int,
-            }
-        )
-    else:
-        list_for_results = []
-        for sample in result:
-            list_for_results.append([
-                sample.state, sample.state.lsb_int, sample.probability,
-                sample.amplitude, sample.state.int,
-            ])
-
-        pdf = pd.DataFrame(
-            list_for_results,
-            columns=['States', "Int_lsb", "Probability", "Amplitude", "Int"]
-        )
-        pdf.sort_values(["Int_lsb"], inplace=True)
-    return pdf
-
-def init_state(alpha):
-    """
-    Initialize qubit state
-    """
-    tree = KPTree(np.array([np.sqrt(1.0 - alpha), np.sqrt(alpha)])).get_routine()
-    return tree
+    gate = KPTree(np.array([np.sqrt(1.0 - alpha), np.sqrt(alpha)])).get_routine()
+    return gate
 
 
 def _matrix_gen(inaccuracy):
-    """
-    Matrix M for M gate
+    r"""
+    Definition of the matrix for the M gate
+
+    Notes
+    -----
+    .. math::
+        \theta = \frac{\text{inaccuracy}\pi}{2}
+    .. math::
+        M = \begin{bmatrix}
+            \sin{\theta} & \cos{\theta} \\
+            \cos{\theta} & -\sin{\theta} \\
+        \end{bmatrix}
+
+    Parameters
+    ----------
+    inaccuracy : float
+        Input inacuracy for the matrix
+    Return
+    ------
+    gate : numpy array
+        array with the Matrix for M gate
     """
     theta = inaccuracy * np.pi / 2
     return np.array([
         [np.cos(theta), np.sin(theta)],
         [np.sin(theta), -np.cos(theta)]
     ])
+
 m_gate = qlm.AbstractGate("M", [float], arity=1, matrix_generator=_matrix_gen)
 
 @qlm.build_gate("Precision", [float], arity=1)
 def precision_gate(precision):
     """
-    Implication Gate in QLM Abstract Gate
+    Quantum QLM gate for a precision fact.
+    Parameters
+    ----------
+    precision : float
+        Precision of the fact
+    Return
+    ------
+    routine : QLM Routine
+        QLM Routine with the quantum implementation for a fact with
+        precision
     """
     routine = qlm.QRoutine()
     register = routine.new_wires(1)
@@ -101,7 +90,16 @@ def precision_gate(precision):
 @qlm.build_gate("Rule", [float], arity=3)
 def rule_gate(certainty):
     """
-    Implication Gate in QLM Abstract Gate
+    Quantum QLM gate for a rule with a input level of certainty
+    Parameters
+    ----------
+    certainty : float
+        Certainty of the rule
+    Return
+    ------
+    routine : QLM Routine
+        QLM Routine with the quantum implementation for a rule with
+        certainty
     """
 
     routine = qlm.QRoutine()
@@ -113,7 +111,11 @@ def rule_gate(certainty):
 @qlm.build_gate("Not", [], arity=2)
 def not_gate():
     """
-    Not Gate
+    Quantum QLM gate for a NOT inferential gate
+    Return
+    ------
+    routine : QLM Routine
+        QLM Routine with the quantum implementation for a NOT gate
     """
     routine = qlm.QRoutine()
     register = routine.new_wires(2)
@@ -124,7 +126,11 @@ def not_gate():
 @qlm.build_gate("And", [], arity=3)
 def and_gate():
     """
-    AND gate
+    Quantum QLM gate for a AND inferential gate
+    Return
+    ------
+    routine : QLM Routine
+        QLM Routine with the quantum implementation for a AND gate
     """
     routine = qlm.QRoutine()
     register = routine.new_wires(3)
@@ -134,7 +140,11 @@ def and_gate():
 @qlm.build_gate("Or", [], arity=3)
 def or_gate():
     """
-    OR gate
+    Quantum QLM gate for a OR inferential gate
+    Return
+    ------
+    routine : QLM Routine
+        QLM Routine with the quantum implementation for a OR gate
     """
     routine = qlm.QRoutine()
     register = routine.new_wires(3)

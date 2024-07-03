@@ -1,20 +1,31 @@
+"""
+Python Classes for implementing Quantum QLM versions of the inferential
+gates.
+The base class is the InferentialGate one.
 
-import numpy as np
-import pandas as pd
-from scipy.optimize import minimize
+
+"""
+
 from random import random
+from scipy.optimize import minimize
+import numpy as np
 import qat.lang.AQASM as qlm
-from qat.qpus import CLinalg
-from gates_qlm import *
+from gates_qlm import init_state, precision_gate, rule_gate
+from gates_qlm import not_gate, and_gate, or_gate
+from solve import solve_qjob
 
 
 
 class InferentialGate:
     """
-    This gate has 2 input 1-qubit states |a> and |b> and we want a
-    1-qubit state |c>. All the 1 qubit state will be of the same form:
-    |i> = (1.0 - alpha_i) ** 0.5 |0> + alpha_i ** 0.5 |1>
-    For defining the states c_i is needed.
+    Inferential gate base class
+    Parameters
+    ----------
+    qpu : QLM qpu
+        QLM qpu for solving the QLM quantum circuits
+    alpha_c : float
+        Desired probability of the |1> state for the gate
+        
     """
 
     def __init__(self, qpu, alpha_c):
@@ -37,6 +48,9 @@ class InferentialGate:
         self.factor = 0.2
 
     def fit(self):
+        """
+        Method for executing the minimization of the gate
+        """
         self.guess()
         self.minimize()
 
@@ -45,27 +59,50 @@ class InferentialGate:
         Method for initializing guess variables for minimization
         """
         pass
-
-    def minimize(self):
-        """
-        Method for optimize the circuit gate
-        """
-        pass
-
-    def loss(self, guess, output):
-        """
-        Method for computing the loss
-        """
-        pass
-
     def circuit(self, alpha, beta):
         """
         Method for building the corresponding quantum circuit
+        Parameters
+        ----------
+        alpha : float
+            Depending on the gate it can be: Probability of |1> state
+            for first input qubit or the precision of the fact for the
+            gate. It can be None
+            Probability of |1> state for first input qubit
+        beta : float
+            Depending on the gate it can be: Probability of |1> state
+            for second input qubit or the certainty of the rule for the
+            gate. It can be None
+        """
+        pass
+    def loss(self, guess, output):
+        """
+        Method for computing the loss
+        Parameters
+        ----------
+        guess : list
+            list with the inputs variables for the method circuit.
+        output : float
+            Desired probability of |1> state for the gate.
         """
         pass
 
+    def minimize(self):
+        """
+        Method for minimize the parameters of the QLM quantum gate
+        """
+        pass
 
 class AND(InferentialGate):
+    """
+    AND gate class.
+    Parameters
+    ----------
+    qpu : QLM qpu
+        QLM qpu for solving the QLM quantum circuits
+    alpha_c : float
+        Desired probability of the |1> state for the AND gate
+    """
 
     def guess(self):
         """
@@ -85,7 +122,13 @@ class AND(InferentialGate):
         self.guess_ = np.array([self.alpha_a, self.alpha_b])
     def circuit(self, alpha, beta):
         """
-        Method for building the corresponding quantum circuit
+        Method for building the corresponding quantum circuit for AND gate
+        Parameters
+        ----------
+        alpha : float
+            Probability of |1> state for first input qubit
+        beta : float
+            Probability of |1> state for second input qubit.
         """
         routine = qlm.QRoutine()
         gate = and_gate()
@@ -99,7 +142,13 @@ class AND(InferentialGate):
         )
     def loss(self, guess, output):
         """
-        Method for computing the loss
+        Method for computing the loss of the AND gate
+        Parameters
+        ----------
+        guess : list
+            list with the inputs variables for the AND circuit.
+        output : float
+            Desired probability of |1> state for the AND gate.
         """
         alpha = guess[0]
         beta = guess[1]
@@ -109,7 +158,7 @@ class AND(InferentialGate):
         return loss_
     def minimize(self):
         """
-        Method for optimize the circuit gate
+        Method for optimize the AND QLM quantum gate
         """
         bnds = ((0.0, 1.0) for i in self.guess_)
         res = minimize(
@@ -123,6 +172,15 @@ class AND(InferentialGate):
 
 
 class OR(InferentialGate):
+    """
+    OR gate class.
+    Parameters
+    ----------
+    qpu : QLM qpu
+        QLM qpu for solving the QLM quantum circuits
+    alpha_c : float
+        Desired probability of the |1> state for the OR gate
+    """
 
     def guess(self):
         """
@@ -144,7 +202,13 @@ class OR(InferentialGate):
 
     def circuit(self, alpha, beta):
         """
-        Method for building the corresponding quantum circuit
+        Method for building the corresponding quantum circuit for OR gate
+        Parameters
+        ----------
+        alpha : float
+            Probability of |1> state for first input qubit
+        beta : float
+            Probability of |1> state for second input qubit.
         """
         routine = qlm.QRoutine()
         gate = or_gate()
@@ -158,7 +222,13 @@ class OR(InferentialGate):
         )
     def loss(self, guess, output):
         """
-        Method for computing the loss
+        Method for computing the loss of the OR gate
+        Parameters
+        ----------
+        guess : list
+            list with the inputs variables for the OR circuit.
+        output : float
+            Desired probability of |1> state for the OR gate.
         """
         alpha = guess[0]
         beta = guess[1]
@@ -168,7 +238,7 @@ class OR(InferentialGate):
         return loss_
     def minimize(self):
         """
-        Method for optimize the circuit gate
+        Method for optimize the OR QLM quantum gate
         """
         bnds = ((0.0, 1.0) for i in self.guess_)
         res = minimize(
@@ -181,6 +251,15 @@ class OR(InferentialGate):
         self.alpha_b = res.x[1]
 
 class NOT(InferentialGate):
+    """
+    NOT gate class.
+    Parameters
+    ----------
+    qpu : QLM qpu
+        QLM qpu for solving the QLM quantum circuits
+    alpha_c : float
+        Desired probability of the |1> state for the NOT gate
+    """
 
     def guess(self):
         """
@@ -193,7 +272,11 @@ class NOT(InferentialGate):
 
     def circuit(self, alpha, beta=None):
         """
-        Method for building the corresponding quantum circuit
+        Method for building the corresponding quantum circuit for NOT gate
+        Parameters
+        ----------
+        alpha : float
+            Probability of |1> state for first input qubit
         """
         routine = qlm.QRoutine()
         gate = not_gate()
@@ -206,7 +289,13 @@ class NOT(InferentialGate):
         )
     def loss(self, guess, output):
         """
-        Method for computing the loss
+        Method for computing the loss of the NOT gate
+        Parameters
+        ----------
+        guess : list
+            list with the inputs variables for the NOT circuit.
+        output : float
+            Desired probability of |1> state for the NOT gate.
         """
         alpha = guess[0]
         self.circuit(alpha)
@@ -215,7 +304,7 @@ class NOT(InferentialGate):
         return loss_
     def minimize(self):
         """
-        Method for optimize the circuit gate
+        Method for optimize the NOT QLM quantum gate
         """
         bnds = ((0.0, 1.0) for i in self.guess_)
         res = minimize(
@@ -227,6 +316,15 @@ class NOT(InferentialGate):
         self.alpha_a = res.x[0]
 
 class PRECISION(InferentialGate):
+    """
+    PRECISION gate class.
+    Parameters
+    ----------
+    qpu : QLM qpu
+        QLM qpu for solving the QLM quantum circuits
+    alpha_c : float
+        Desired probability of the |1> state for the PRECISION gate
+    """
     def guess(self):
         """
         Method for initializing guess variables for minimization
@@ -235,7 +333,12 @@ class PRECISION(InferentialGate):
 
     def circuit(self, alpha):
         """
-        Method for building the corresponding quantum circuit
+        Method for building the corresponding quantum circuit for a fact
+        with a fixed precision
+        Parameters
+        ----------
+        alpha : float
+            Precision of the fact
         """
         routine = qlm.QRoutine()
         gate = precision_gate(alpha)
@@ -247,7 +350,13 @@ class PRECISION(InferentialGate):
         )
     def loss(self, guess, output):
         """
-        Method for computing the loss
+        Method for computing the loss of the PRECISION gate
+        Parameters
+        ----------
+        guess : list
+            list with the inputs variables for the OR circuit.
+        output : float
+            Desired probability of |1> state for the OR gate.
         """
         alpha = guess[0]
         self.circuit(alpha)
@@ -257,7 +366,7 @@ class PRECISION(InferentialGate):
 
     def minimize(self):
         """
-        Method for optimize the circuit gate
+        Method for optimize the PRECISION QLM quantum gate.
         """
         bnds = ((0.0, 1.0) for i in self.guess_)
         res = minimize(
@@ -270,6 +379,15 @@ class PRECISION(InferentialGate):
 
 
 class RULE(InferentialGate):
+    """
+    RULE gate class.
+    Parameters
+    ----------
+    qpu : QLM qpu
+        QLM qpu for solving the QLM quantum circuits
+    alpha_c : float
+        Desired probability of the |1> state for the RULE gate
+    """
     def guess(self):
         """
         Method for initializing guess variables for minimization
@@ -285,7 +403,14 @@ class RULE(InferentialGate):
 
     def circuit(self, alpha, beta):
         """
-        Method for building the corresponding quantum circuit
+        Method for building the corresponding quantum circuit for a rule
+        with a fixed uncertainty
+        Parameters
+        ----------
+        alpha : float
+            Probability of |1> state for first input qubit
+        beta : float
+            Certainty of the rule
         """
         routine = qlm.QRoutine()
         gate = rule_gate(beta)
@@ -298,7 +423,13 @@ class RULE(InferentialGate):
         )
     def loss(self, guess, output):
         """
-        Method for computing the loss
+        Method for computing the loss of the RULE gate
+        Parameters
+        ----------
+        guess : list
+            list with the inputs variables for the RULE circuit.
+        output : float
+            Desired probability of |1> state for the RULE gate.
         """
         alpha = guess[0]
         beta = guess[1]
@@ -309,7 +440,7 @@ class RULE(InferentialGate):
 
     def minimize(self):
         """
-        Method for optimize the circuit gate
+        Method for optimize the RULE QLM quantum gate.
         """
         bnds = ((0.0, 1.0) for i in self.guess_)
         res = minimize(
@@ -320,20 +451,3 @@ class RULE(InferentialGate):
         )
         self.alpha_a = res.x[0]
         self.alpha_b = res.x[1]
-
-
-if __name__ == "__main__":
-    from qat.core.console import display
-    #opa = PRECISION(CLinalg(), 0.4)
-    opa = RULE(CLinalg(), 0.6)
-
-    #opa.guess()
-    #print(opa.guess_)
-    #opa.circuit(0.2, 0.6)
-    #c = opa.job.circuit
-    #display(c)
-    opa.fit()
-    print("alpha_a: {}. alpha_b: {}. alpha_c: {}".format(
-        opa.alpha_a, opa.alpha_b, opa.alpha_c))
-
-
