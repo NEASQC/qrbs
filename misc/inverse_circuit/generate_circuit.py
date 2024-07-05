@@ -1,10 +1,12 @@
 """
 Generate the random  inferential circuit
 """
-from inferential_gates import *
-from gates_qlm import *
+import qat.lang.AQASM as qlm
+from inferential_gates import PRECISION, RULE, AND, OR, NOT
+from gates_qlm import precision_gate, rule_gate
+from gates_qlm import not_gate, and_gate, or_gate
+from solve import solve_qjob
 from qat.core.console import display
-from solve import solve_qjob 
 
 def quantum_circuit(circuit_list):
     """

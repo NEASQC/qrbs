@@ -25,7 +25,6 @@ class InferentialGate:
         QLM qpu for solving the QLM quantum circuits
     alpha_c : float
         Desired probability of the |1> state for the gate
-        
     """
 
     def __init__(self, qpu, alpha_c):
