@@ -2,7 +2,7 @@
 [
     {
         "qpu_type": ["c", "python", "linalg", "mps", "qlmass_linalg", "qlmass_mps"],
-        "kak_compiler" : ["ions", "ZXZ", "XZX", "ZYZ", "u3", "ibm", "rx+"],
+        "kak_compiler" : [null],
         "t_gate_1qb" : [null],
         "t_gate_2qbs" : [null],
         "t_readout": [null],
