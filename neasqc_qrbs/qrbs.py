@@ -2,6 +2,8 @@
 
 from abc import ABC, abstractmethod
 
+import numpy as np
+
 from .knowledge_rep import BuilderBayes, BuilderFuzzy, BuilderImpl, Fact, Rule, KnowledgeIsland
 from qat.lang.AQASM import Program
 try:
@@ -339,5 +341,4 @@ class MyQlmQPU(QPU):
                         for sample in result:
                             if sample.state.bitstring[index] == '1':
                                 temp += sample.probability
-                        element.precision = temp
-                
+                        element.precision = 2*np.arcsin(np.sqrt(temp)) / np.pi
