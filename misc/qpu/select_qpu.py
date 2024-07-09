@@ -47,6 +47,9 @@ with the following keys:
         error.
 """
 
+import sys
+sys.path.append("../")
+
 def select_qpu(hw_cfg):
     """
     This function allows to select a QPU (a ideal or a noisy one).
@@ -73,8 +76,7 @@ def select_qpu(hw_cfg):
 if __name__ == "__main__":
     import json
     import argparse
-    import sys
-    from benchmark_utils import combination_for_list
+    from qpu.benchmark_utils import combination_for_list
 
     parser = argparse.ArgumentParser()
     parser.add_argument(

@@ -32,8 +32,8 @@
         "qpu_name" : ["noisy_0"],
         "kak_compiler" : ["ZXZ"],
         "sim_method": [{
-            "sim_method": "stochastic",
-            "n_samples": 100
+            "sim_method": "mpo",
+            "bond_dimension": 16
         }], 
         "t_gate_1qb" : [35],
         "t_gate_2qbs" : [660],
@@ -59,8 +59,8 @@
         "qpu_name" : ["noisy_1"],
         "kak_compiler" : ["ZXZ"],
         "sim_method": [{
-            "sim_method": "stochastic",
-            "n_samples": 100
+            "sim_method": "mpo",
+            "bond_dimension": 16
         }], 
         "t_gate_1qb" : [35],
         "t_gate_2qbs" : [660],
@@ -86,8 +86,8 @@
         "qpu_name" : ["noisy_2"],
         "kak_compiler" : ["ZXZ"],
         "sim_method": [{
-            "sim_method": "stochastic",
-            "n_samples": 100
+            "sim_method": "mpo",
+            "bond_dimension": 16
         }], 
         "t_gate_1qb" : [35],
         "t_gate_2qbs" : [660],
@@ -113,8 +113,8 @@
         "qpu_name" : ["noisy_3"],
         "kak_compiler" : ["ZXZ"],
         "sim_method": [{
-            "sim_method": "stochastic",
-            "n_samples": 100
+            "sim_method": "mpo",
+            "bond_dimension": 16
         }], 
         "t_gate_1qb" : [35],
         "t_gate_2qbs" : [660],
@@ -140,8 +140,8 @@
         "qpu_name" : ["noisy_4"],
         "kak_compiler" : ["ZXZ"],
         "sim_method": [{
-            "sim_method": "stochastic",
-            "n_samples": 100
+            "sim_method": "mpo",
+            "bond_dimension": 16
         }], 
         "t_gate_1qb" : [35],
         "t_gate_2qbs" : [660],
@@ -167,8 +167,8 @@
         "qpu_name" : ["noisy_5"],
         "kak_compiler" : ["ZXZ"],
         "sim_method": [{
-            "sim_method": "stochastic",
-            "n_samples": 100
+            "sim_method": "mpo",
+            "bond_dimension": 16
         }], 
         "t_gate_1qb" : [35],
         "t_gate_2qbs" : [660],

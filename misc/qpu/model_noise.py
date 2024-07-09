@@ -152,7 +152,7 @@ def create_qpu(hw_cfg):
         generated QPU (can be a noisy one)
     """
 
-    from qat.qpus import NoisyQProc, LinAlg
+    from qat.qpus import NoisyQProc, LinAlg, MPO
 
     # First: Rewriter of Rotation Gates 
     from qat.plugins import KAKCompression
@@ -175,21 +175,28 @@ def create_qpu(hw_cfg):
     # Added QPU
     if hw_cfg["qpu_type"] == "noisy":
         model_noisy = noisy_hw_model(hw_cfg)
-        if hw_cfg["sim_method"] not in ["stochastic", "deterministic", "deterministic-vectorized"]:
+        qpu_cfg = hw_cfg["sim_method"]
+        if qpu_cfg["sim_method"] not in ["stochastic", "deterministic", "deterministic-vectorized", "mpo"]:
             raise ValueError("sim_method MUST BE stochastic, deterministic, deterministic-vectorized")
-        if hw_cfg["sim_method"] == "stochastic":
+        if qpu_cfg["sim_method"] == "stochastic":
             my_qpu= NoisyQProc(
                 hardware_model=model_noisy,
-                sim_method=hw_cfg["sim_method"],
+                sim_method=qpu_cfg["sim_method"],
                 backend_simulator=LinAlg(),
-                n_samples = hw_cfg["n_samples"]
+                n_samples = qpu_cfg["n_samples"]
             )
-        else:
+        if qpu_cfg["sim_method"] in ["deterministic", "deterministic-vectorized"]:
             my_qpu= NoisyQProc(
                 hardware_model=model_noisy,
-                sim_method=hw_cfg["sim_method"],
+                sim_method=qpu_cfg["sim_method"],
                 backend_simulator=LinAlg(),
             )
+        if qpu_cfg["sim_method"] in ["mpo"]:
+            my_qpu = MPO(
+                hardware_model=model_noisy,
+                bond_dimension=qpu_cfg["bond_dimension"]
+            )
+        
     else:
         my_qpu = LinAlg()
     my_plugin = my_plugin | my_qpu

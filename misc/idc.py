@@ -4,6 +4,7 @@ QRBS implementation of a  IDC
 
 
 import sys
+import time
 import itertools as it
 import pandas as pd
 sys.path.append("../")
@@ -11,6 +12,29 @@ from neasqc_qrbs.qrbs import QRBS
 from neasqc_qrbs.knowledge_rep import AndOperator, OrOperator, NotOperator
 from selectable_qpu import SelectableQPU
 
+def save(save, save_name, input_pdf, save_mode):
+    """
+    For saving panda DataFrames to csvs
+
+    Parameters
+    ----------
+
+    save: bool
+        For saving or not
+    save_nam: str
+        name for file
+    input_pdf: pandas DataFrame
+    save_mode: str
+        saving mode: overwrite (w) or append (a)
+    """
+    if save:
+        with open(save_name, save_mode) as f_pointer:
+            input_pdf.to_csv(
+                f_pointer,
+                mode=save_mode,
+                header=f_pointer.tell() == 0,
+                sep=';'
+            )
 def idc_qrbs(row, qpu=None, shots=None, model='cf'):
     """
     QRBS implementation of the IDC
@@ -229,11 +253,18 @@ def prepare_input():
 
     return tmn_final
 
-def exe(qpu, shots, model):
+def exe(qpu_cfg, qpu, shots, model, save_name, save_):
     tmn_final = prepare_input()
     lista = []
-    for row in tmn_final[:2].iterrows():
-        print(idc_qrbs(row[1], qpu, shots, model))
+    pdf = pd.DataFrame.from_dict(qpu_cfg, orient="index").T
+    for row in tmn_final[:3].iterrows():
+        tick = time.time()
+        step = idc_qrbs(row[1], qpu, shots, model)
+        tack = time.time()
+        step["elapsed"] = tack - tick
+        step = pd.concat([step, pdf], axis=1)
+        step["tmn"] = row[1]["tmn"]
+        save(save_, save_name, step, "a") 
 
 if __name__ == "__main__":
     import argparse
@@ -266,11 +297,39 @@ if __name__ == "__main__":
         default=None,
     )
     parser.add_argument(
+        "-shots",
+        dest="shots",
+        type=int,
+        help="Number of shots for quantum circuit",
+        default=100,
+    )
+    parser.add_argument(
+        "-model",
+        dest="model",
+        type=str,
+        default="cf",
+        help="Inferential model desired: cf, bayes, fuzzy"
+    )
+    parser.add_argument(
+        "-name",
+        dest="base_name",
+        type=str,
+        help="Additional name for the generated files",
+        default="",
+    )
+    parser.add_argument(
         "--print",
         dest="print",
         default=False,
         action="store_true",
         help="For printing "
+    )
+    parser.add_argument(
+        "--save",
+        dest="save",
+        default=False,
+        action="store_true",
+        help="For saving staff"
     )
     parser.add_argument(
         "--exe",
@@ -294,5 +353,7 @@ if __name__ == "__main__":
             print(final_list)
     if args.execution:
         if args.id is not None:
-            qpu = select_qpu(final_list[args.id])
-            exe(qpu, 100, "cf")
+            qpu_cfg = final_list[args.id]
+            qpu = select_qpu(qpu_cfg)
+            base_name = args.base_name + "_" + str(args.id) + ".csv"
+            exe(qpu_cfg, qpu, args.shots, args.model, base_name, args.save)
