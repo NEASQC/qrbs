@@ -39,6 +39,6 @@ After the building process has finished, you will find the ``dist`` directory wi
 
 .. code::
 
-    pip install neasqc-qrbs
+    pip install .\neasqc-qrbs-0.4.0.tar.gz
 
 Once the installation process is done, you have finished!
