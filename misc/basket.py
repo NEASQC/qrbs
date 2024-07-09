@@ -118,7 +118,7 @@ def basquet_qrbs(throw, height, qpu, type_qpu=None, shots=None, model='cf'):
     player_very_good = basket.assert_fact("player_very_good", "0/60-1/75-1/100")
     output = [player_bad, player_normal, player_good, player_very_good]
     ###### RULES ######
-    rule_certainty = 0.8
+    rule_certainty = 1.0
     # Rule for normal player
     normal_0 = AndOperator(height_normal, throw_good)
     normal_1 = AndOperator(height_normal, throw_very_good)
@@ -142,8 +142,11 @@ def basquet_qrbs(throw, height, qpu, type_qpu=None, shots=None, model='cf'):
     # Rule for very good player
     rule_3 = basket.assert_rule(
         OrOperator(
-            AndOperator(height_tall, throw_very_good),
-            AndOperator(height_very_tall, throw_good)
+            OrOperator(
+                AndOperator(height_tall, throw_very_good),
+                AndOperator(height_very_tall, throw_good)
+            ),
+            AndOperator(height_very_tall, throw_very_good)
         ),
         player_very_good,
         rule_certainty
