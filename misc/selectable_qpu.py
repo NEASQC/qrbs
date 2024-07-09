@@ -88,7 +88,6 @@ class SelectableQPU(QPU):
         if islands is None:
             islands = []
         builder = SelectableQPU.BUILDERS[model]
-        print(builder)
         # Initiate islands in case of specified evaluation
         if not islands:
             islands = qrbs._engine._islands

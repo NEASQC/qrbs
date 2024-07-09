@@ -142,10 +142,7 @@ def basquet_qrbs(throw, height, qpu, type_qpu=None, shots=None, model='cf'):
     # Rule for very good player
     rule_3 = basket.assert_rule(
         OrOperator(
-            OrOperator(
-                AndOperator(height_tall, throw_very_good),
-                AndOperator(height_very_tall, throw_good)
-            ),
+            AndOperator(height_tall, throw_very_good),
             AndOperator(height_very_tall, throw_very_good)
         ),
         player_very_good,
