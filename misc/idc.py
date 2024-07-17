@@ -35,7 +35,175 @@ def save(save, save_name, input_pdf, save_mode):
                 header=f_pointer.tell() == 0,
                 sep=';'
             )
+
+def qrbs_idc():
+    """
+    QRBS implementation of the IDC
+    Return
+    ------
+    idc : qrbs
+    """
+    idc = QRBS()
+    # Setting the input facts
+    # Related to tumor
+    t0 = idc.assert_fact('T0', 'No evidence of tumor')
+    t1 = idc.assert_fact('T1', 'Size less than or equal to 20mm')
+    t2 = idc.assert_fact('T2', 'Size between 20mm and 50mm')
+    t3 = idc.assert_fact('T3', 'Size greater than 50mm')
+    t4 = idc.assert_fact('T4', 'Tumor involves chest wall')
+    t5 = idc.assert_fact('T5', 'Tumor affects skin')
+    # Related to lymphatic or auxilary nodes
+    n0a = idc.assert_fact('N0A', 'Absence of cancer in lymph nodes')
+    n0b = idc.assert_fact('N0B', 'Size in lymph nodes less than 0.2mm')
+    n0 = OrOperator(n0a, n0b)
+    n1a = idc.assert_fact('N1A', 'From 1 to 3 affected axillary lymph nodes')
+    n1b = idc.assert_fact('N1B', 'Internal lymph nodes affected')
+    n1 = OrOperator(n1a, n1b)
+    n2a = idc.assert_fact('N2A', 'From 4 to 9 affected axillary lymph nodes')
+    n2b = idc.assert_fact('N2B', 'No axillary lymph node involvement')
+    n2 = OrOperator(n2a, n2b)
+    n3a = idc.assert_fact('N3A', 'More than 10 affected axillary lymph nodes')
+    n3b = idc.assert_fact('N3B', 'Lymph nodes below the collarbone affected')
+    n3c = idc.assert_fact('N3C', 'Superclavicular lymph nodes affected')
+    n3 = OrOperator(n3a, OrOperator(n3b, n3c))
+    # Related to metastasis
+    m0 = idc.assert_fact('M0', 'No evidence of metastasis')
+    m1 = idc.assert_fact('M1', 'Cancer cells in other organs')
+    # Combination of input facts for creating TNM staging system
+    t1n0m0 = AndOperator(t1, AndOperator(n0, m0))
+    t0n1m0 = AndOperator(t0, AndOperator(n1, m0))
+    t1n1m0 = AndOperator(t1, AndOperator(n1, m0))
+    t2n0m0 = AndOperator(t2, AndOperator(n0, m0))
+    t2n1m0 = AndOperator(t2, AndOperator(n1, m0))
+    t3n0m0 = AndOperator(t3, AndOperator(n0, m0))
+    t0n2m0 = AndOperator(t0, AndOperator(n2, m0))
+    t1n2m0 = AndOperator(t1, AndOperator(n2, m0))
+    t3n2m0 = AndOperator(t3, AndOperator(n2, m0))
+    t3n1m0 = AndOperator(t3, AndOperator(n1, m0))
+    t4n0m0 = AndOperator(t4, AndOperator(n0, m0))
+    t4n1m0 = AndOperator(t4, AndOperator(n1, m0))
+    t4n2m0 = AndOperator(t4, AndOperator(n2, m0))
+    txn3m0 = AndOperator(n3, m0)
+    txnym1 = m1
+    # Output facts
+    ia = idc.assert_fact('IA', 'Stage I-A')
+    ib = idc.assert_fact('IB', 'Stage I-B')
+    iia = idc.assert_fact('IIA', 'Stage II-A')
+    iib = idc.assert_fact('IIB', 'Stage II-B')
+    iiia = idc.assert_fact('IIIA', 'Stage III-A')
+    iiib = idc.assert_fact('IIIB', 'Stage III-B')
+    iiic = idc.assert_fact('IIIC', 'Stage III-C')
+    iv = idc.assert_fact('IV', 'Stage IV')
+    # Rules of the IDC
+    rule_ia = idc.assert_rule(t1n0m0, ia, 1.0)
+    rule_ib = idc.assert_rule(OrOperator(t0n1m0, t1n1m0), ib, 1.0)
+    rule_iia = idc.assert_rule(
+        OrOperator(t0n1m0, OrOperator(t1n1m0, t2n0m0)), iia, 1.0)
+    rule_iib = idc.assert_rule(OrOperator(t2n1m0, t3n0m0), iib, 1.0)
+    rule_iiia = idc.assert_rule(
+        OrOperator(
+            t0n2m0,
+            OrOperator(
+                OrOperator(t1n2m0, t2n0m0),
+                OrOperator(t3n2m0, t3n1m0)
+            )
+        ),
+        iiia,
+        1.0
+    )
+    rule_iiib = idc.assert_rule(
+        OrOperator(t4n0m0, OrOperator(t4n1m0, t4n2m0)), iiib, 1.0)
+    rule_iiic = idc.assert_rule(txn3m0, iiic, 1.0)
+    rule_iv = idc.assert_rule(txnym1, iv, 1.0)
+    # Defining the islands
+    staging_ia = idc.assert_island([rule_ia])
+    staging_ib = idc.assert_island([rule_ib])
+    staging_iia = idc.assert_island([rule_iia])
+    staging_iib = idc.assert_island([rule_iib])
+    staging_iiia = idc.assert_island([rule_iiia])
+    staging_iiib = idc.assert_island([rule_iiib])
+    staging_iiic = idc.assert_island([rule_iiic])
+    staging_iv = idc.assert_island([rule_iv])
+    return idc 
+
+def load_data_in_qrbs(row, qrbs):
+    """
+    Given a qrbs load the data into the input facts
+    Parameters
+    ----------
+    row : row of a pandas DataFrame
+        input information for the idc as a pandas DataFrame row
+    qrbs: qrbs
+    Return
+    ------
+    qrbs : qrbs
+        qrbs  with the input data properly loaded
+    """
+    labels = list(row.index)
+    for fact in qrbs._memory._facts:
+        if fact.attribute in labels:
+            fact.precision = row[fact.attribute]
+    return qrbs
+
+def solve_qrbs(qrbs, qpu, shots=100, model="cf"):
+    """
+    Solved a propely initialized qrbs
+    Parameters
+    ----------
+    qrbs : qrbs
+        qrbs  with the input data properly loaded
+    qpu : QLM qpu
+        QLM qpu for solving the quantum circuits
+    shots : int
+        Number of shots for measuring the quantum circuits
+    model : string
+        String with the inacuracy propagation model: cf, fuzzy, bayes
+    Return
+    ------
+    pdf : pandas DataFrame
+        Dataframe with the solution
+    """
+    
+    inference_engine = SelectableQPU()
+    inference_engine.execute(qrbs, qpu=qpu, shots=shots, model=model)
+    output_label = ["IA", "IB", "IIA", "IIB", "IIIA", "IIIB", "IIIC", "IV"]
+    output_precision = []
+    output_names = []
+    for label in output_label:
+        for i_ in qrbs._memory._facts:
+            if i_.attribute == label:
+                output_precision.append(i_.precision)
+                output_names.append(i_.value)
+    pdf = pd.DataFrame(output_precision, index = output_names).T
+    return pdf
+
 def idc_qrbs(row, qpu=None, shots=None, model='cf'):
+    """
+    QRBS implementation of the IDC
+    Parameters
+    ----------
+    row : row of a pandas DataFrame
+        input information for the idc as a pandas DataFrame row
+    qpu : QLM qpu
+        QLM qpu for solving the quantum circuits
+    shots : int
+        Number of shots for measuring the quantum circuits
+    model : string
+        String with the inacuracy propagation model: cf, fuzzy, bayes
+    Return
+    ------
+    pdf : pandas DataFrame
+        Dataframe with the solution
+    """
+    # Create qrbs
+    idc = qrbs_idc()
+    idc = load_data_in_qrbs(row, idc)
+    pdf = solve_qrbs(idc, qpu, shots=shots, model=model)
+    return pdf
+    
+    
+
+def idc_qrbs_old(row, qpu=None, shots=None, model='cf'):
     """
     QRBS implementation of the IDC
     Parameters
@@ -235,7 +403,7 @@ def prepare_input():
     t_ = [[float(i == j) for i in range(6)] for j in range(5)]
     #Posible n values
     n_ = [[float(i == j) for i in range(9)] for j in range(9)]
-    m_ = [[int(i == j) for i in range(2)] for j in range(2)]
+    m_ = [[float(i == j) for i in range(2)] for j in range(2)]
     data = [list(it.chain.from_iterable(i)) for i in it.product(t_, n_, m_)]
     columns = [
         'T0', 'T1', 'T2', 'T3', 'T4', 'T5',
@@ -255,16 +423,33 @@ def prepare_input():
 
 def exe(qpu_cfg, qpu, shots, model, save_name, save_):
     tmn_final = prepare_input()
-    lista = []
+    tmn_compatible = [
+        "T1 N0 M0", "T0 N1 M0", "T1 N1 M0", "T0 N1 M0", "T1 N1 M0", "T2 N0 M0",
+        "T2 N1 M0", "T3 N0 M0", "T0 N2 M0", "T1 N2 M0", "T2 N0 M0", "T3 N2 M0",
+        "T3 N1 M0", "T4 N0 M0", "T4 N1 M0", "T4 N2 M0", "TX N3 M0", "TX NY M1"]
     pdf = pd.DataFrame.from_dict(qpu_cfg, orient="index").T
-    for row in tmn_final[:3].iterrows():
+    for tmn in tmn_compatible:
+        step_tmn = tmn_final[tmn_final["tmn"] == tmn]
+        row = step_tmn.iloc[0]
         tick = time.time()
-        step = idc_qrbs(row[1], qpu, shots, model)
+        step = idc_qrbs(row, qpu, shots, model)
         tack = time.time()
         step["elapsed"] = tack - tick
-        step = pd.concat([step, pdf], axis=1)
-        step["tmn"] = row[1]["tmn"]
+        pdf_row = pd.DataFrame(row).T.reset_index(drop=True)
+        step = pd.concat([step, pdf_row, pdf], axis=1)
         save(save_, save_name, step, "a") 
+        # print(step)
+        
+    # lista = []
+    # pdf = pd.DataFrame.from_dict(qpu_cfg, orient="index").T
+    # for row in tmn_final[:3].iterrows():
+    #     tick = time.time()
+    #     step = idc_qrbs(row[1], qpu, shots, model)
+    #     tack = time.time()
+    #     step["elapsed"] = tack - tick
+    #     step = pd.concat([step, pdf], axis=1)
+    #     step["tmn"] = row[1]["tmn"]
+    #     save(save_, save_name, step, "a") 
 
 if __name__ == "__main__":
     import argparse
@@ -301,7 +486,7 @@ if __name__ == "__main__":
         dest="shots",
         type=int,
         help="Number of shots for quantum circuit",
-        default=100,
+        default=0,
     )
     parser.add_argument(
         "-model",

@@ -33,7 +33,7 @@
         "kak_compiler" : ["ZXZ"],
         "sim_method": [{
             "sim_method": "stochastic",
-            "n_samples": 100
+            "n_samples": 1000
         }], 
         "t_gate_1qb" : [35],
         "t_gate_2qbs" : [660],
@@ -60,7 +60,7 @@
         "kak_compiler" : ["ZXZ"],
         "sim_method": [{
             "sim_method": "stochastic",
-            "n_samples": 100
+            "n_samples": 1000
         }], 
         "t_gate_1qb" : [35],
         "t_gate_2qbs" : [660],
@@ -87,7 +87,7 @@
         "kak_compiler" : ["ZXZ"],
         "sim_method": [{
             "sim_method": "stochastic",
-            "n_samples": 100
+            "n_samples": 1000
         }], 
         "t_gate_1qb" : [35],
         "t_gate_2qbs" : [660],
@@ -114,7 +114,7 @@
         "kak_compiler" : ["ZXZ"],
         "sim_method": [{
             "sim_method": "stochastic",
-            "n_samples": 100
+            "n_samples": 1000
         }], 
         "t_gate_1qb" : [35],
         "t_gate_2qbs" : [660],
@@ -141,7 +141,7 @@
         "kak_compiler" : ["ZXZ"],
         "sim_method": [{
             "sim_method": "stochastic",
-            "n_samples": 100
+            "n_samples": 1000
         }], 
         "t_gate_1qb" : [35],
         "t_gate_2qbs" : [660],
@@ -168,7 +168,7 @@
         "kak_compiler" : ["ZXZ"],
         "sim_method": [{
             "sim_method": "stochastic",
-            "n_samples": 100
+            "n_samples": 1000
         }], 
         "t_gate_1qb" : [35],
         "t_gate_2qbs" : [660],
