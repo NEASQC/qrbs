@@ -194,7 +194,7 @@ def create_qpu(hw_cfg):
     
     # Second: Use Patter Manager: Rewrite Toffolis
     from qat.synthopline.compiler import EXPANSION_COLLECTION
-    FROM qat.pbo import PatternManager
+    from qat.pbo import PatternManager
     expansion_plugin = PatternManager(collections=[EXPANSION_COLLECTION])
     
     my_plugin = kak_plugin | expansion_plugin
