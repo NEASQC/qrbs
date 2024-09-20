@@ -63,6 +63,7 @@ def run_id(**kwargs):
     # Create the file name
     file_name = folder + name + "_" + str(kwargs.get("id")) + ".csv"
     # Transform qpu configuration to Pandas 
+    print(cfg["qpu_cfg"])
     qpu_pdf = to_pdf(cfg["qpu_cfg"])
     qpu_pdf["model"] = model
     qpu_pdf["shots"] = shots
@@ -76,6 +77,8 @@ def run_id(**kwargs):
         Throws = [16]
         Heights = [198]
     else:
+        pdf_players = pd.read_csv(kwargs.get("players"), sep=";", index_col=0)
+        print(pdf_players)
         Name = ["Elias" , "Blas", "Luis", "Juan", "Raul", "Cholo"]
         Throws = [16, 17, 17, 15, 18, 18]
         Heights = [198, 193, 188, 203, 176, 186]
@@ -111,6 +114,13 @@ if __name__ == "__main__":
     import json
     import argparse
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-players",
+        dest="players",
+        type=str,
+        default="./players.csv",
+        help="csv with the player list to evaluate",
+    )
     parser.add_argument(
         "-json_qpu",
         dest="json_qpu",
