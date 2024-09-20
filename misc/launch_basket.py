@@ -7,7 +7,7 @@ from basket import basquet_qrbs
 
 def to_pdf(qpu_cfg):
     lista = [
-        "qpu_type", "qpu_name", "kak_compiler", "sim_method", "n_samples",
+        "qpu_type", "qpu_name", "kak_compiler", "sim_method",
         "t_gate_1qb", "t_gate_2qbs", "t_readout"]
     qpu_data = [qpu_cfg[element] for element in  lista]
     qpu_pdf = pd.DataFrame(qpu_data, index=lista).T
@@ -70,9 +70,15 @@ def run_id(**kwargs):
     qpu = select_qpu(qpu_cfg)
 
     # Players
-    Name = ["Elias" , "Blas", "Luis", "Juan", "Raul", "Cholo"]
-    Throws = [16, 17, 17, 15, 18, 18]
-    Heights = [198, 193, 188, 203, 176, 186]
+    test = kwargs.get("test")
+    if test:
+        Name = ["Elias"]
+        Throws = [16]
+        Heights = [198]
+    else:
+        Name = ["Elias" , "Blas", "Luis", "Juan", "Raul", "Cholo"]
+        Throws = [16, 17, 17, 15, 18, 18]
+        Heights = [198, 193, 188, 203, 176, 186]
     
     # Create qpu for inference
     qpu_selected = SelectableQPU()
@@ -167,6 +173,13 @@ if __name__ == "__main__":
         default=False,
         action="store_true",
         help="For saving staff"
+    )
+    parser.add_argument(
+        "--test",
+        dest="test",
+        default=False,
+        action="store_true",
+        help="Only one player will be evaluated."
     )
     parser.add_argument(
         "-folder",

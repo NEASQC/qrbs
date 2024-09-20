@@ -8,6 +8,7 @@ NOT BE** used with these functions.
 """
 
 import numpy as np
+import functools
 
 # Obtenido de ibm_brisbane: 2024/04/04
 # error_gate_1qb = 2.27e-4

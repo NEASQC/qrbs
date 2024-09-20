@@ -77,7 +77,7 @@ def get_membership_function(domain, def_linear_picewise):
     return array
 
 
-def basquet_qrbs(throw, height, qpu, type_qpu=None, shots=None, model='cf'):
+def basquet_qrbs(throw, height, qpu, type_qpu=None, shots=None, model='cf', rule_certainty=1.0):
     """
     QRBS for a basket dummy problem
 
@@ -118,7 +118,7 @@ def basquet_qrbs(throw, height, qpu, type_qpu=None, shots=None, model='cf'):
     player_very_good = basket.assert_fact("player_very_good", "0/60-1/75-1/100")
     output = [player_bad, player_normal, player_good, player_very_good]
     ###### RULES ######
-    rule_certainty = 1.0
+    #rule_certainty = 0.8
     # Rule for normal player
     normal_0 = AndOperator(height_normal, throw_good)
     normal_1 = AndOperator(height_normal, throw_very_good)
