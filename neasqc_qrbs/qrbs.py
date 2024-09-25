@@ -6,7 +6,10 @@ import numpy as np
 
 from .knowledge_rep import BuilderBayes, BuilderFuzzy, BuilderImpl, Fact, Rule, KnowledgeIsland
 from qat.lang.AQASM import Program
-from qat.pylinalg import PyLinalg
+try:
+    from qat.pylinalg import PyLinalg
+except ModuleNotFoundError:
+    print("Module Not Found")
 
 
 class WorkingMemory:
@@ -339,4 +342,3 @@ class MyQlmQPU(QPU):
                             if sample.state.bitstring[index] == '1':
                                 temp += sample.probability
                         element.precision = 2*np.arcsin(np.sqrt(temp)) / np.pi
-                
