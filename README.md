@@ -1,6 +1,6 @@
-# NEASQC lib template
+# Quantum Rule-Based System (QRBS) software library
 
-This is the repository for the Quantum Rule-Based System (QRBS) library of NEASQC project (WP6).
+This is the repository for the Quantum Rule-Based System (QRBS) library of NEASQC project (WP6). Quantum Rule-Based Systems (QRBS) are defined as those Rule-Based Systems (RBS) that use the formalism of Quantum Computing (QC) for representing knowledge and for making inferences. Inaccurate knowledge is one of the fundamental problems of AI. In particular, it is one of the essential problems of RBS, and at the same time one of the most complex to deal with. We propose the use of QRBS to model this inaccurate knowledge and manage it.
 
 ## Licence
 
@@ -9,64 +9,20 @@ The `LICENCE` file contains the default licence statement as specified in the pr
 ## Building and installing
 
 For simplicity, an example of `setup.py` file is provided in this template.
-Feel free to modify it if you have exotic build recipes.
 
+## Repository structure
 
-## Coding conventions
+The _neasqc_qrbs_ package is structured in two main modules:
 
-In order to simplify the coding conventions, we provide a pylint.rc file in `misc/pylint.rc`.
-This will allow you to easily check your naming conventions and various other aspects.
-This is not a strict guidline, as pylint can be quite pedantic sometimes (but also very helpful).
+- **knowledge_rep**: conformed by the classes that allow us to encode knowledge into the system.
+- **qrbs**: conformed by the classes that manage the encoded knowledge and extract utility from it.
 
-A few remarks:
-- pylint can be integrated in most editors (and we strongly advise you to)
-- running pylint on several source files in one go can find errors such as circular imports or code duplication:
+## Jupyter Notebooks
 
-```bash
-python -m pylint --rcfile=./misc/pylint.rc <my_source_dir>
-```
-or
+A series of Jupyter notebooks have been developed in the misc/notebooks directory as tutorials. These notebooks explain the functionality of the various packages and modules within the library, as well as demonstrate how to utilize them to model RBSs and manage inaccurate knowledge with them.
 
-```bash
-pylint --rcfile=./misc/pylint.rc <my_source_dir>
-```
-
-depending on how you installed pylint.
-
-## Testing and continuous integration
-
-In order to uniformise the continuous integration process across libraries, we will assume that:
-- all the tests related to your library are compatible with pytest
-- there exists a 'test' recipe in the `setup.py` file
-
-The default test recipe (in this template) simply calls pytest on the full repository.
-Pytest detects:
-- any file that starts with test\_ (e.g test\_my\_class.py)
-- inside these files, any function that starts test\_
-- any class that starts with Test
-
-You can run it with:
-
-```bash
-python setup.py test
-```
-
-This way, you can write tests either right next to the corresponding code (convenient) or in a `tests` folder at the root of the repository.
-
-If you are not familiar with unit testing and you feel that it's too much for your project, that's fine.
-The bare minimum would be to include some run examples wrapped in test functions (functional tests).
-
-## GitHub CI
-This repository contains a GitHub Workflow file that will automatically run pytest when changes are pushed.  
-Details on disabling and enabling this feature can be found [here](https://docs.github.com/en/enterprise-server@3.0/actions/managing-workflow-runs/disabling-and-enabling-a-workflow).
+These notebooks provide extra functionalities beyond those offered by the _neasqc_qrbs_ package, and their source can be found under the misc/ directoy.
 
 ## Documentation
-Customize the GitHub Workflow YAML file: .github/workflow/sphinx\_doc.yml
-There is a basic index.rst template under 'doc'. Modify it as you want.
 
-Any modification under the folder 'doc' pushed to GitHub will trigger a rebuild of the documentation (using GitHub CI).
-If the build is successful, then the resulting html documentation can be access at: https://neasqc.github.io/qrbs
-
-Notes: 
-  - You can follow the build process on the 'Actions' tab below the name of the repository.
-  - neasqc.github.io does not immediately update. You may need to wait a minute or two before it see the changes.
+The documentation for this software can be accessed at: https://neasqc.github.io/qrbs
